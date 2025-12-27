@@ -6,9 +6,6 @@ export default {
   overrides: [
     {
       files: ["*.vue", "**/*.vue"],
-      rules: {
-        "unit-allowed-list": ["em", "rem", "s", "ms"],
-      },
     },
   ],
   rules: {
