@@ -35,6 +35,7 @@ export default [
       ],
       "vue/multi-word-component-names": "off", // 关闭组件名称必须为多单词的检查
       "vue/singleline-html-element-content-newline": "off", // 关闭单行 HTML 元素内容换行检查
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
   {
@@ -50,6 +51,7 @@ export default [
     rules: {
       "simple-import-sort/imports": "warn", // import 语句强制按字母顺序排序
       "simple-import-sort/exports": "warn", // export 语句强制按字母顺序排序
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
 ];
