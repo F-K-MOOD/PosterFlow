@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { computed,reactive } from 'vue'
 
 // import type { TextComponentProps } from '@/types/TextComponentProps'
-import type { ComponentData,EditorProps } from './helper'
+import type { ComponentData, EditorProps } from './helper'
 
 export const useEditorStore = defineStore('editor', () => {
   const state: EditorProps = reactive({
@@ -24,11 +24,13 @@ export const useEditorStore = defineStore('editor', () => {
     currentElement: ''
   })
   // 添加组件
-  function addComponent(props: ComponentData['props']) {
+  function addComponent(props: ComponentData) {
     const newComponent: ComponentData = {
       id: uuidv4(),
       name: 'PFText',
-      props
+      props: {
+        ...props.props
+      }
     }
     state.components.push(newComponent)
   }

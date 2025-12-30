@@ -36,6 +36,7 @@ export default [
       "vue/multi-word-component-names": "off", // 关闭组件名称必须为多单词的检查
       "vue/singleline-html-element-content-newline": "off", // 关闭单行 HTML 元素内容换行检查
       "@typescript-eslint/no-explicit-any": "warn",
+      "vue/require-default-prop": "off",
     },
   },
   {

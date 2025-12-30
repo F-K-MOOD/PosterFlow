@@ -1,11 +1,20 @@
 <script lang="ts">
+import { message } from 'ant-design-vue';
+import { v4 as uuidv4 } from 'uuid'
 import { defineComponent, } from 'vue';
 
 import PFText from '@/components/PFText.vue';
+import StyledUploader from '@/components/StyledUploader.vue'
+import { imageComponentProps } from '@/constants/imageComponentProps';
+import type { ComponentData } from '@/store/modules/editor/helper';
+import type { RespUploadData } from '@/types/respTypes';
+import { getImageDimensions } from '@/utils/getImageDimensions'
+
 export default defineComponent({
   name: 'PFComponentsList',
   components: {
-    PFText
+    PFText,
+    StyledUploader
   },
   props: {
     list: {
@@ -18,8 +27,30 @@ export default defineComponent({
     const onItemClick = (item: Record<string, any>) => {
       emit('on-item-click', item)
     }
+
+    function onImageUploaded(data: { resp: RespUploadData; file: File }) {
+      const { resp, file } = data
+      const componentData: ComponentData = {
+        id: uuidv4(),
+        name: 'PFImage',
+        props: {
+          ...imageComponentProps 
+        }
+      }
+      componentData.props.src = resp.data.urls[0]
+      message.success('图片上传成功')
+      emit('on-item-click', componentData)
+      componentData.props.src = resp.data.urls[0]
+      getImageDimensions(file).then(({ width }) => {
+        const maxWidth = 373
+        componentData.props.width = ((width > maxWidth) ? maxWidth : width) + 'px'
+        emit('on-item-click', componentData)
+      })
+    }
+
     return {
-      onItemClick
+      onItemClick,
+      onImageUploaded
     }
   }
 })
@@ -36,6 +67,7 @@ export default defineComponent({
       <PFText v-bind="item" />
     </div>
   </div>
+  <StyledUploader @success="onImageUploaded" />
 </template>
 
 <style>
