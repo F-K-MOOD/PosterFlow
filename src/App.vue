@@ -1,11 +1,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 
+import Uploader from './components/Uploader.vue';
 import Editor from './views/Editor/Editor.vue';
 export default defineComponent({
   name: 'PFEditor',
   components: {
-    Editor
+    Editor,
+    Uploader
   }
 })
 </script>
@@ -13,6 +15,7 @@ export default defineComponent({
 <template>
   <div>
     <Editor />
+    <Uploader list-type="picture" :drag="false" action="https://www.mocky.io/v2/5cc8019d300000980a055e76" />
   </div>
 </template>
 
