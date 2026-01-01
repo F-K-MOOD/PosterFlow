@@ -1,5 +1,6 @@
 axios
 commitlint
+cropperjs
 hoverable
 ImageProcesser
 inital
