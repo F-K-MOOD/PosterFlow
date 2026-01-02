@@ -1,44 +1,38 @@
-<script lang="ts">
+<script lang="ts" setup>
 import { pick } from 'lodash-es'
-import { computed,defineComponent } from 'vue'
+import { computed } from 'vue'
 
-export default defineComponent({
+defineOptions({
   name: 'PFEditWrapper',
-  props: {
-    id: {
-      type: String,
-      required: true
-    },
-    active: {
-      type: Boolean,
-      default: false
-    },
-    props: {
-      type: Object,
-      default: () => ({})
-    }
-  },
-  emits:['set-active'],
-  setup(props, { emit }) {
-    const styles = computed(() => pick(props.props, ['position', 'top', 'left', 'width', 'height']))
-    function onItemClick(id: string) {
-      emit('set-active', id)
-    }
-    return {
-      onItemClick,
-      styles
-    }
-  }
 })
+
+// 定义组件props 与 emits
+interface EditWrapperProps {
+  id: string
+  active?: boolean
+  hidden?: boolean
+  props?: Record<string, any>
+}
+const props = withDefaults(defineProps<EditWrapperProps>(), {
+  active: false,
+  hidden: false,
+})
+const emits = defineEmits(['set-active'])
+
+const styles = computed(() => pick(props.props, ['position', 'top', 'left', 'width', 'height']))
+function onItemClick(id: string) {
+  emits('set-active', id)
+}
 </script>
 
 <template>
   <div 
     class="edit-wrapper" 
     :class="{'active': active}" 
-    @click="onItemClick(id)"
+    :style="styles"
+    @click="onItemClick(props.id)"
   >
-    <slot></slot>
+    <slot />
   </div>
 </template>
 
@@ -53,8 +47,10 @@ export default defineComponent({
 
 .edit-wrapper>* {
   position: static !important;
-  width: 100% !important;
-  height: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  display: block !important;
+  visibility: visible !important;
 }
 
 .edit-wrapper:hover {

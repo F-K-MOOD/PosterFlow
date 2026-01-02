@@ -1,7 +1,8 @@
-<script lang="ts">
+<script lang="ts" setup>
 import { Layout, LayoutContent, LayoutSider } from 'ant-design-vue'
-import { computed, defineComponent } from 'vue'
+import { computed } from 'vue'
 
+import PFImage from '@/components/PFImage.vue'
 import PFText from '@/components/PFText.vue'
 import { defaultTemplates } from '@/constants/defaultTemplates'
 import { useEditorStore } from '@/store/modules/editor';
@@ -11,41 +12,29 @@ import PFComponentsList from './components/ComponentsList.vue'
 import PFEditWrapper from './components/EditWrapper.vue'
 import PFPropsTable from './components/PropsTable.vue'
 
-export default defineComponent({
-  name: 'PFEditor',
-  components: {
-    Layout,
-    LayoutContent,
-    LayoutSider,
-    PFText,
-    PFComponentsList,
-    PFEditWrapper,
-    PFPropsTable
-  },
-  setup() {
-    const editorStore = useEditorStore()
-    const components = computed(() => editorStore.state.components)
-    const activeComponent = computed<ComponentData | undefined>(() => editorStore.activeComponent)
-
-    const addItem = (item: Record<string, any>) => {
-      editorStore.addComponent(item)
-    }
-    const setActive = (id: string) => {
-      editorStore.setActive(id)
-    }
-    const handelChange = (e: { key: keyof ComponentData['props']; value: any }) => {
-      editorStore.updateComponent(e.key, e.value)
-    }
-    return {
-      components,
-      defaultTemplates,
-      addItem,
-      setActive,
-      activeComponent,
-      handelChange
-    }
-  }
+defineOptions({
+  name: 'PFEditor'
 })
+
+const editorStore = useEditorStore()
+const components = computed(() => editorStore.state.components)
+const activeComponent = computed<ComponentData | undefined>(() => editorStore.activeComponent)
+
+// 创建组件映射，用于动态渲染不同类型的组件
+const componentMap = {
+  PFText,
+  PFImage
+}
+
+const addItem = (item: ComponentData) => {
+  editorStore.addComponent(item)
+}
+const setActive = (id: string) => {
+  editorStore.setActive(id)
+}
+const handelChange = (e: { key: keyof ComponentData['props']; value: any }) => {
+  editorStore.updateComponent(e.key, e.value)
+}
 </script>
 
 <template>
@@ -70,7 +59,11 @@ export default defineComponent({
               :active="!!activeComponent && activeComponent.id === component.id"
               @set-active="setActive"
             >
-              <component :is="component.name" v-bind="component.props" />
+              <component 
+                :is="componentMap[component.name]" 
+                v-bind="component.props"
+                v-if="componentMap[component.name]"
+              />
             </PFEditWrapper>
           </div>
         </LayoutContent>

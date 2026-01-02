@@ -1,51 +1,39 @@
-<script lang="ts">
+<script lang="ts" setup>
 import { FileImageOutlined, LoadingOutlined } from '@ant-design/icons-vue'
-import { defineComponent } from 'vue'
 
-import {useCommonUploadCheck} from '@/hooks/useCommonUploadCheck.ts'
+import { useCommonUploadCheck } from '@/hooks/useCommonUploadCheck.ts'
 import type { RespUploadData } from '@/types/respTypes'
 
 import Uploader from './Uploader.vue'
-export default defineComponent({
-  components: {
-    Uploader,
-    FileImageOutlined,
-    LoadingOutlined,
-  },
-  props: {
-    text: {
-      type: String,
-      default: '上传图片'
-    },
-    showUploaded: {
-      type: Boolean,
-      default: false
-    }
-  },
-  emits: ['success'],
-  setup(props, { emit }) {
-    const handleUploadSuccess = (resp: RespUploadData, file: File) => {
-      emit('success', { resp, file })
-    }
-    return {
-      useCommonUploadCheck,
-      handleUploadSuccess
-    }
-  }
+
+interface StyledUploaderProps {
+  text?: string
+  showUploaded?: boolean
+}
+
+// 定义props 和 emits
+const props = withDefaults(defineProps<StyledUploaderProps>(), {
+  text: '上传图片',
+  showUploaded: false
 })
+const emit = defineEmits(['success'])
+
+const handleUploadSuccess = (resp: RespUploadData, file: File) => {
+  emit('success', { resp, file })
+}
 </script>
 
 <template>
   <uploader 
     class="styled-uploader" 
-    action="/utils/upload-img" 
+    action="/api/utils/upload-img" 
     :show-upload-list="false"
     :before-upload="useCommonUploadCheck" 
-    @success="(data:any) => { handleUploadSuccess(data, data.file.raw) }"
+    @success="(data: any) => { handleUploadSuccess(data.resp, data.file.raw) }"
   >
     <div class="uploader-container">
       <FileImageOutlined />
-      <h4>{{ text }}</h4>
+      <h4>{{ props.text }}</h4>
     </div>
     <template #loading>
       <div class="uploader-container">
@@ -55,13 +43,10 @@ export default defineComponent({
     </template>
     <template #uploaded="dataProps">
       <div class="uploader-container">
-        <img 
-          v-if="showUploaded" 
-          :src="dataProps.uploadedData.data.urls[0]"
-        >
+        <img v-if="props.showUploaded" :src="dataProps.uploadedData.data.urls[0]">
         <template v-else>
           <FileImageOutlined />
-          <h4>{{ text }}</h4>
+          <h4>{{ props.text }}</h4>
         </template>
       </div>
     </template>
@@ -82,18 +67,21 @@ export default defineComponent({
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
   }
+
   .uploader-container:hover {
     background: #40a9ff;
   }
+
   .uploader-container h4 {
     color: #ffffff;
     margin-bottom: 0;
     margin-left: 10px;
   }
+
   .uploader-container img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
-} 
+}
 </style>

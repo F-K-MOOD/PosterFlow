@@ -1,6 +1,11 @@
+alicloud
+aliyuncs
+autod
 axios
 commitlint
 cropperjs
+dysmsapi
+filemanager
 hoverable
 ImageProcesser
 inital

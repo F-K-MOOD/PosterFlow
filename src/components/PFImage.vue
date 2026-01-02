@@ -6,7 +6,7 @@ import { imageStylePropsNames } from '../constants/imageComponentProps'
 
 // array that contains style props
 defineOptions({
-  name: 'PfImage',
+  name: 'PFImage',
 })
 
 // 使用 withDefaults 定义 props 及其默认值

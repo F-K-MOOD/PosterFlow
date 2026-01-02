@@ -1,7 +1,8 @@
 <script lang="ts" setup>
-import { DeleteOutlined, FileOutlined,LoadingOutlined } from '@ant-design/icons-vue'
+import { DeleteOutlined, FileOutlined, LoadingOutlined } from '@ant-design/icons-vue'
+import { message } from 'ant-design-vue'
 import axios from 'axios'
-import {last} from 'lodash-es'
+import { last } from 'lodash-es'
 import { v4 as uuidv4 } from 'uuid'
 import { computed, reactive, ref } from 'vue'
 
@@ -32,10 +33,10 @@ interface UploaderProps {
 }
 
 // 定义props和emits
-const props = withDefaults(defineProps<UploaderProps>(),{
+const props = withDefaults(defineProps<UploaderProps>(), {
   drag: true,
   autoUpload: true,
-  listType: 'text',
+  listType: 'picture',
   showUploadList: true
 })
 const emits = defineEmits(['change', 'uploaded', 'success', 'error'])
@@ -49,7 +50,13 @@ function triggerUpload() {
 }
 function handleFileChange(e: Event) {
   const target = e.target as HTMLInputElement
-  beforeUploadCheck(target.files)
+  // 复制文件列表，防止丢失
+  const files = target.files
+  if (files) {
+    beforeUploadCheck(files)
+  } else {
+    message.error('No files found in input')
+  }
 }
 function beforeUploadCheck(files: null | FileList) {
   if (files && files.length > 0 && files[0]) {
@@ -82,7 +89,7 @@ function addFileToList(fileObj: File) {
     status: 'ready',
     raw: fileObj
   })
-  if (props.listType === 'picture') {
+  if (props.listType === 'text') {
     uploadFile.url = URL.createObjectURL(fileObj)
   }
   uploadedFiles.value.push(uploadFile)
@@ -91,8 +98,10 @@ function addFileToList(fileObj: File) {
   }
 }
 function postFile(uploadFile: UploadFile) {
+  // 设置上传状态为loading
+  uploadFile.status = 'loading'
   const formData = new FormData()
-  formData.append(uploadFile.name, uploadFile.raw)
+  formData.append('file', uploadFile.raw)
   axios.post(props.action, formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
@@ -100,10 +109,10 @@ function postFile(uploadFile: UploadFile) {
   }).then(res => {
     uploadFile.status = 'success'
     uploadFile.resp = res.data
+    console.log('Upload response:', res.data.data)
     emits('success', { resp: res.data, file: uploadFile, list: uploadedFiles.value })
   }).catch(e => {
     uploadFile.status = 'error'
-    console.error(e)
     emits('error', { error: e, file: uploadFile, list: uploadedFiles.value })
   }).finally(() => {
     if (fileInput.value) {
@@ -162,11 +171,7 @@ function handleDrop(e: DragEvent) {
 
 <template>
   <div class="file-upload">
-    <div 
-      class="upload-area"
-      :class="{'is-dragover': drag && isDragover}"
-      v-on="events"
-    >
+    <div class="upload-area" :class="{ 'is-dragover': drag && isDragover }" v-on="events">
       <!-- 通过插槽实现初始容器的自定义和上传完毕后的自定义 -->
       <slot v-if="isUploading" name="loading">
         <button disabled>正在上传</button>
@@ -180,25 +185,21 @@ function handleDrop(e: DragEvent) {
     </div>
     <input 
       ref="fileInput" 
-      type="file"
+      type="file" 
       :style="{
         display: 'none'
-      }"
+      }" 
       @change="handleFileChange"
     >
     <ul v-if="showUploadList" :class="`upload-list upload-list-${listType}`">
-      <li 
-        v-for="item in uploadedFiles" 
-        :key="item.uid"
-        :class="`uploaded-file ${item.status}`"
-      >
-        <img
-          v-if="item.url && listType === 'picture'"
-          class="upload-list-thumbnail"
-          :src="item.url"
+      <li v-for="item in uploadedFiles" :key="item.uid" :class="`uploaded-file ${item.status}`">
+        <img 
+          v-if="item.url && listType === 'picture'" 
+          class="upload-list-thumbnail" 
+          :src="item.url" 
           :alt="item.name"
         >
-       <span v-if="item.status === 'loading'" class="file-icon">
+        <span v-if="item.status === 'loading'" class="file-icon">
           <LoadingOutlined />
         </span>
         <span v-else class="file-icon">
