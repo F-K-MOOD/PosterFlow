@@ -27,7 +27,7 @@ export const useEditorStore = defineStore('editor', () => {
   function addComponent(props: ComponentData) {
     const newComponent: ComponentData = {
       id: uuidv4(),
-      name: 'PFText',
+      name: props.name,
       props: {
         ...props.props
       }

@@ -3,6 +3,7 @@ import { h } from 'vue'
 
 import type { TextComponentProps } from "./TextComponentProps"  
 export interface PropToForm {
+  events: any
   component: string
   subComponent?: string
   options?: {text: string | VNode, value: any}[]
@@ -18,7 +19,7 @@ export type PropsToForms = {
   [key in keyof TextComponentProps]?: PropToForm
 }
 
-export const mapPropsToForms: PropsToForms = {
+export const mapPropsToForms: Record<string, any> = {
   text: {
     component: 'a-textarea',
     text: '内容',
@@ -66,6 +67,9 @@ export const mapPropsToForms: PropsToForms = {
       {text: h('span', {style: {'font-family': 'KaiTi'}}, '楷体'), value: '"KaiTi"'},
       {text: h('span', {style: {'font-family': 'STFangsong'}}, '仿宋'), value: '"STFangsong"'},
     ]
-  }
+  },
+  src: {
+    component: 'ImageProcesser'
+  },
 }
 

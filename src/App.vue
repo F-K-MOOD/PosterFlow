@@ -15,7 +15,7 @@ export default defineComponent({
 <template>
   <div>
     <Editor />
-    <Uploader list-type="picture" :drag="false" action="https://www.mocky.io/v2/5cc8019d300000980a055e76" />
+    <Uploader list-type="picture" :drag="false" action="http://localhost:7002/api/utils/upload-img" />
   </div>
 </template>
 

@@ -14,7 +14,7 @@ export interface ComponentData {
   // id，uuid v4 生成
   id: string;
   // 业务组件库名称 l-text，l-image 等等 
-  name: 'PFText' | 'PFImage' | 'PFShape';
+  name: string ;
   // 图层是否隐藏
   isHidden?: boolean;
   // 图层是否锁定

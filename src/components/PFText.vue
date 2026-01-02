@@ -1,31 +1,33 @@
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script lang="ts" setup>
+import { computed } from 'vue'
 
-import { createPropsFromDefaults } from '@/utils/createPropsFromDefaults'
-
-import { textComponentProps, textStylePropNames } from '../constants/textComponentProps'
-import useComponentCommon from '../hooks/useComponentCommon'
-
-// array that contains style props
-const defaultProps = createPropsFromDefaults(textComponentProps)
-
-export default defineComponent({
-  name: 'PFText',
-  props: {
-    tag: {
-      type: String,
-      default: 'div'
-    },
-    ...defaultProps
-  },
-  setup(props) {
-    const { handleClick, styleProps } = useComponentCommon(props, textStylePropNames)
-    return {
-      handleClick,
-      styleProps
-    }
-  }
+defineOptions({
+  name: 'PFText'
 })
+
+// 定义 props
+interface TextComponentProps {
+  tag?: string;
+  text?: string;
+  fontSize?: string;
+  color?: string;
+}
+const props = withDefaults(defineProps<TextComponentProps>(),{
+  tag:  'div',
+  text:  '默认文本',
+  fontSize:  '14px',
+  color:  '#000000'
+})
+
+// 简化样式处理
+const styleProps = computed(() => ({
+  fontSize: props.fontSize,
+  color: props.color
+}))
+
+const handleClick = () => {
+  console.log('文本组件被点击')
+}
 </script>
 
 <template>

@@ -1,73 +1,69 @@
-<script lang="ts">
+<script lang="ts" setup>
 import { Input, InputNumber, RadioButton, RadioGroup, Select, SelectOption, Slider } from 'ant-design-vue'
 import { reduce } from 'lodash-es';
 import type { VNode } from 'vue'
-import { computed, defineComponent, } from 'vue'
+import { computed } from 'vue'
 
 import type { PropsToForms } from '@/types/propsMap'
 import { mapPropsToForms } from '@/types/propsMap'
-import type { TextComponentProps } from '@/types/TextComponentProps';
 
+import ImageProcesser from '../../../components/ImageProcesser.vue'
 import RenderVnode from '../../../components/RenderVnode';
+
+defineOptions({
+  name: 'PFPropsTable',
+})
 
 interface FormProps {
   component: string;
   subComponent?: string;
   value: string;
   extraProps?: Record<string, any>;
-  text?: string ;
+  text?: string;
   options?: { text: string | VNode; value: any }[];
   valueProp?: string;
   eventName?: string;
   events?: Record<string, (e: any) => void>;
 }
 
-export default defineComponent({
-  name: 'PFPropsTable',
-  components: {
-    'a-input': Input,
-    'a-input-number': InputNumber,
-    'a-slider': Slider,
-    'a-radio-group': RadioGroup,
-    'a-radio-button': RadioButton,
-    'a-select': Select,
-    'a-select-option': SelectOption,
-    RenderVnode,
-  },
-  props: {
-    props: {
-      type: Object,
-      required: true
-    },
-  },
-  emits: ['change'],
-  setup(props, { emit }) {
-    const finalProps = computed(() => {
-      return reduce(props.props, (result, singleProp, key) => {
-        const newKey = key as keyof TextComponentProps
-        const item = mapPropsToForms[newKey]
-        if (item) {
-          const { valueProp = 'value', eventName = 'change', initalTransform } = item
-          const newItem: FormProps = {
-            ...item,
-            value: initalTransform ? initalTransform(singleProp) : singleProp,
-            valueProp,
-            eventName,
-            events: {
-              [eventName]: (e: any) => { emit('change', { newKey, value: item.afterTransform ? item.afterTransform(e) : e }) }
-            }
-          }
-          result[newKey] = newItem
-        }
-        return result
-      }, {} as Required<PropsToForms>)
-    })
+const componentMap = {
+  'a-input': Input,
+  'a-input-number': InputNumber,
+  'a-slider': Slider,
+  'a-radio-group': RadioGroup,
+  'a-radio-button': RadioButton,
+  'a-select': Select,
+  'a-select-option': SelectOption,
+  'ImageProcesser': ImageProcesser,
+  RenderVnode,
+}
 
-    return {
-      finalProps,
-      mapPropsToForms
+// 定义组件props 与 emits
+interface PropsTableProps {
+  props: Record<string, any>;
+}
+const props = defineProps<PropsTableProps>()
+const emits = defineEmits(['change'])
+
+const finalProps = computed(() => {
+  return reduce(props.props, (result, value, key) => {
+    const newKey = key 
+    const item = mapPropsToForms[newKey]
+    if (item) {
+      const { valueProp = 'value', eventName = 'change', initalTransform } = item
+      const newItem: FormProps = {
+        ...item,
+        value: initalTransform ? initalTransform(value) : value,
+        valueProp,
+        eventName,
+        events: {
+          [eventName]: (e: any) => { emits('change', { key: newKey, value: item.afterTransform ? item.afterTransform(e) : e }) }
+        }
+      }
+      result[newKey] = newItem
     }
-  }
+    return result
+  }, {} as Required<PropsToForms>)
 })
 </script>
 
@@ -79,9 +75,10 @@ export default defineComponent({
       :key="key" 
       class="prop-item"
     >
+      <!-- 表单左侧描述label -->
       <span v-if="value.text" class="label">{{ value.text }}</span>
       <component 
-        :is="value.component" 
+        :is="componentMap[value.component]" 
         v-if="value" 
         :value="value.value"
         v-bind="value.extraProps" 
@@ -89,7 +86,7 @@ export default defineComponent({
       >
         <template v-if="value.options">
           <component 
-            :is="value.subComponent" 
+            :is="componentMap[value.subComponent]" 
             v-for="(option, k) in value.options" 
             :key="k" 
             :value="option.value"
