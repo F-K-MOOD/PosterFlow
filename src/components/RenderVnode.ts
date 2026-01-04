@@ -7,7 +7,7 @@ const RenderVnode = defineComponent({
       required: true
     }
   },
-  render(props) {
+  render(props: { vNode: any }) {
     return props.vNode
   }
 })

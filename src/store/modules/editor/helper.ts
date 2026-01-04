@@ -21,4 +21,6 @@ export interface ComponentData {
   isLocked?: boolean;
   // 图层名称
   layerName?: string;
+  // 是否是根组件
+  isRoot?: boolean;
 }

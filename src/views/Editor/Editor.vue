@@ -1,7 +1,9 @@
 <script lang="ts" setup>
-import { Layout, LayoutContent, LayoutSider } from 'ant-design-vue'
-import { computed } from 'vue'
+import { Empty, Layout, LayoutContent, LayoutSider, TabPane, Tabs, Textarea } from 'ant-design-vue'
+import { computed, ref } from 'vue'
 
+import EditGroup from '@/components/EditGroup.vue'
+import LayerList from '@/components/LayerList.vue'
 import PFImage from '@/components/PFImage.vue'
 import PFText from '@/components/PFText.vue'
 import { defaultTemplates } from '@/constants/defaultTemplates'
@@ -10,7 +12,8 @@ import type { ComponentData } from '@/store/modules/editor/helper'
 
 import PFComponentsList from './components/ComponentsList.vue'
 import PFEditWrapper from './components/EditWrapper.vue'
-import PFPropsTable from './components/PropsTable.vue'
+
+export type TabType = 'component' | 'layer' | 'page'
 
 defineOptions({
   name: 'PFEditor'
@@ -18,12 +21,13 @@ defineOptions({
 
 const editorStore = useEditorStore()
 const components = computed(() => editorStore.state.components)
-const activeComponent = computed<ComponentData | undefined>(() => editorStore.activeComponent)
+const activeComponent = computed<ComponentData | undefined>(() => editorStore.state.components.find((item) => item.id === editorStore.state.currentElement))
 
 // 创建组件映射，用于动态渲染不同类型的组件
 const componentMap = {
   PFText,
-  PFImage
+  PFImage,
+  Textarea,
 }
 
 const addItem = (item: ComponentData) => {
@@ -32,9 +36,30 @@ const addItem = (item: ComponentData) => {
 const setActive = (id: string) => {
   editorStore.setActive(id)
 }
-const handelChange = (e: { key: keyof ComponentData['props']; value: any }) => {
-  editorStore.updateComponent(e.key, e.value)
+// 更新组件属性
+function handleChangeComponentProps (data: { key: string; value: any }) {
+  if (activeComponent.value) {
+    editorStore.updateComponent({
+      id: activeComponent.value.id,
+      name: activeComponent.value.name,
+      props: {
+        ...activeComponent.value.props,
+        [data.key]: data.value
+      },
+    })
+  }
 }
+// 更新图层列表属性, 隐藏/显示, 锁定/解锁
+function handleChangeLayerListMeta (data: ComponentData) {
+  editorStore.updateComponent(data)
+}
+// 更新图层列表顺序
+function handleChangeLayerListOrder (list: ComponentData[]) {  
+  editorStore.updateComponentList(list)
+}
+
+// 标签页(组件属性, 图层设置, 页面设置)
+const activePanel = ref<TabType>('component') 
 </script>
 
 <template>
@@ -70,7 +95,36 @@ const handelChange = (e: { key: keyof ComponentData['props']; value: any }) => {
       </Layout>
       <!-- 组件属性, 配置 -->
       <LayoutSider width="300" class="settings-panel">
-        <PFPropsTable v-if="activeComponent" :props="activeComponent.props" @change="handelChange" />
+        <Tabs v-model:activeKey="activePanel" type="card">
+          <TabPane key="component" tab="属性设置" class="no-top-radius">
+            <div v-if="activeComponent">
+              <edit-group 
+                v-if="!activeComponent.isLocked" 
+                :props="activeComponent.props"
+                @change="handleChangeComponentProps"
+              />
+              <div v-else>
+                <Empty>
+                  <template #description>
+                    <p>该元素被锁定，无法编辑</p>
+                  </template>
+                </Empty>
+              </div>
+            </div>
+        </TabPane>
+          <TabPane key="layer" tab="图层设置">
+            <layer-list 
+              :list="components" 
+              :selected-id="activeComponent && activeComponent.id" 
+              @change-list="handleChangeLayerListOrder"
+              @change="handleChangeLayerListMeta"
+              @select="setActive"
+            />
+          </TabPane>
+          <!-- <a-tab-pane key="page" tab="页面设置">
+            <props-table :props="page.props" @change="pageChange" />
+          </a-tab-pane> -->
+        </Tabs>       
       </LayoutSider>
     </Layout>
   </div>

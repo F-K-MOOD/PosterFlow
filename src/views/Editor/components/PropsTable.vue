@@ -1,17 +1,33 @@
 <script lang="ts" setup>
-import { Input, InputNumber, RadioButton, RadioGroup, Select, SelectOption, Slider } from 'ant-design-vue'
-import { reduce } from 'lodash-es';
+import { Input, InputNumber, RadioButton, RadioGroup, Select, SelectOption, Slider, Textarea } from 'ant-design-vue'
+import { reduce } from 'lodash-es'
 import type { VNode } from 'vue'
 import { computed } from 'vue'
 
+import ColorPicker from '@/components/ColorPicker.vue'
+import ImageProcesser from '@/components/ImageProcesser.vue'
+import ShadowPicker from '@/components/ShadowPicker.vue'
 import type { PropsToForms } from '@/types/propsMap'
 import { mapPropsToForms } from '@/types/propsMap'
 
-import ImageProcesser from '../../../components/ImageProcesser.vue'
 import RenderVnode from '../../../components/RenderVnode';
 
 defineOptions({
   name: 'PFPropsTable',
+  components: {
+    ImageProcesser,
+    RenderVnode,
+    ColorPicker,
+    Slider,
+    RadioGroup,
+    RadioButton,
+    Select,
+    SelectOption,
+    Textarea,
+    InputNumber,
+    Input,
+    ShadowPicker,
+  },
 })
 
 interface FormProps {
@@ -26,18 +42,6 @@ interface FormProps {
   events?: Record<string, (e: any) => void>;
 }
 
-const componentMap = {
-  'a-input': Input,
-  'a-input-number': InputNumber,
-  'a-slider': Slider,
-  'a-radio-group': RadioGroup,
-  'a-radio-button': RadioButton,
-  'a-select': Select,
-  'a-select-option': SelectOption,
-  'ImageProcesser': ImageProcesser,
-  RenderVnode,
-}
-
 // 定义组件props 与 emits
 interface PropsTableProps {
   props: Record<string, any>;
@@ -47,17 +51,21 @@ const emits = defineEmits(['change'])
 
 const finalProps = computed(() => {
   return reduce(props.props, (result, value, key) => {
+    // 这里的key是components列表里面的中的id, name, props里面的key
     const newKey = key 
     const item = mapPropsToForms[newKey]
     if (item) {
-      const { valueProp = 'value', eventName = 'change', initalTransform } = item
+      const { valueProp = 'value', eventName = 'change', initialTransform } = item
       const newItem: FormProps = {
         ...item,
-        value: initalTransform ? initalTransform(value) : value,
+        value: initialTransform ? initialTransform(value) : value,
         valueProp,
         eventName,
         events: {
-          [eventName]: (e: any) => { emits('change', { key: newKey, value: item.afterTransform ? item.afterTransform(e) : e }) }
+          [eventName]: (e: any) => { 
+            console.log('change', e)
+            emits('change', { key: newKey, value: item.afterTransform ? item.afterTransform(e) : e }) 
+          }
         }
       }
       result[newKey] = newItem
@@ -78,7 +86,7 @@ const finalProps = computed(() => {
       <!-- 表单左侧描述label -->
       <span v-if="value.text" class="label">{{ value.text }}</span>
       <component 
-        :is="componentMap[value.component]" 
+        :is="value.component" 
         v-if="value" 
         :value="value.value"
         v-bind="value.extraProps" 
@@ -86,7 +94,7 @@ const finalProps = computed(() => {
       >
         <template v-if="value.options">
           <component 
-            :is="componentMap[value.subComponent]" 
+            :is="value.subComponent" 
             v-for="(option, k) in value.options" 
             :key="k" 
             :value="option.value"

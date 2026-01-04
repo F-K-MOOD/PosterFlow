@@ -5,6 +5,7 @@ import { computed,reactive } from 'vue'
 // import type { TextComponentProps } from '@/types/TextComponentProps'
 import type { ComponentData, EditorProps } from './helper'
 
+
 export const useEditorStore = defineStore('editor', () => {
   const state: EditorProps = reactive({
     components: [
@@ -17,9 +18,64 @@ export const useEditorStore = defineStore('editor', () => {
           fontWeight: 'bold', 
           lineHeight: '2', 
           textAlign: 'left', 
-          fontFamily: '' 
-        }
+          fontFamily: '',
+          color:'#000000',
+          boxShadow: '0px 0px 0px #000000',
         },
+        layerName: '图层一',
+      },
+      {
+        id: uuidv4(),
+        name: 'PFText',
+        props: {
+          text: 'hello2',
+          fontSize: '10px',
+          fontWeight: 'bold',
+          lineHeight: '2',
+          textAlign: 'left',
+          fontFamily: ''
+        },
+        layerName: '图层二',
+      },
+      {
+        id: uuidv4(),
+        name: 'PFText',
+        props: {
+          text: 'hello2',
+          fontSize: '10px',
+          fontWeight: 'bold',
+          lineHeight: '2',
+          textAlign: 'left',
+          fontFamily: ''
+        },
+        layerName: '图层三',
+      },
+      {
+        id: uuidv4(),
+        name: 'PFText',
+        props: {
+          text: 'hello2',
+          fontSize: '10px',
+          fontWeight: 'bold',
+          lineHeight: '2',
+          textAlign: 'left',
+          fontFamily: ''
+        },
+        layerName: '图层四',
+      },
+      {
+        id: uuidv4(),
+        name: 'PFText',
+        props: {
+          text: 'hello2',
+          fontSize: '10px',
+          fontWeight: 'bold',
+          lineHeight: '2',
+          textAlign: 'left',
+          fontFamily: ''
+        },
+        layerName: '图层五',
+      },
     ],
     currentElement: ''
   })
@@ -53,24 +109,43 @@ export const useEditorStore = defineStore('editor', () => {
     return state.components.find((item) => item.id === state.currentElement)
   })
   // 更新组件属性
-  function updateComponent(key: keyof ComponentData['props'], value: any) {
-    if(state.currentElement) {
-      const component = activeComponent.value
-      if(component) {
-        state.components = state.components.map((item) => {
-          if(item.id === component.id) {
-            return {
-              ...item,
-              props: {
-                ...item.props,
-                [key]: value
-              }
+  function updateComponent(data: ComponentData) {
+    const {id, isHidden, isLocked, layerName, isRoot,props} = data
+    let component: ComponentData | undefined
+    if(id) {
+       component = state.components.find((item) => (item.id === id))
+    } else {
+       component = state.components.find((item) => (item.id === state.currentElement))
+    }
+    if(!component) {
+      return
+    }
+    state.components = state.components.map((item) => {
+      if(item.id === component.id) {
+        if(isRoot) {
+          return {
+            ...item,
+            isHidden,
+            isLocked,
+            layerName
+          }
+        } else {
+          return {
+            ...item,
+            props: {
+              ...item.props,
+              ...props
             }
           }
-          return item
-        })
+        }
+      }else {
+        return item
       }
-    }
+    })
+  }
+  // 更新组件列表
+  function updateComponentList(list: ComponentData[]) {
+    state.components = list
   }
   return {
     state,
@@ -78,6 +153,7 @@ export const useEditorStore = defineStore('editor', () => {
     addComponent,
     removeComponent,
     setActive,
-    updateComponent
+    updateComponent,
+    updateComponentList
   }
 })

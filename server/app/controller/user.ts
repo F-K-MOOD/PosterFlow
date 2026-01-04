@@ -35,13 +35,13 @@ export default class UserController extends Controller {
   async sendVeriCode() {
     const { ctx, app } = this
     const { phoneNumber } = ctx.request.body
-    // 获取 redis 的数据
+    // 获取 redis 的数据 - Redis 服务已禁用，暂时注释
     // phoneVeriCode-1331111222
-    const preVeriCode = await app.redis.get(`phoneVeriCode-${phoneNumber}`)
+    // const preVeriCode = await app.redis.get(`phoneVeriCode-${phoneNumber}`)
     // 判断是否存在
-    if (preVeriCode) {
-      return ctx.helper.error({ ctx, errorType: 'sendVeriCodeFrequentlyFailInfo' })
-    }
+    // if (preVeriCode) {
+    //   return ctx.helper.error({ ctx, errorType: 'sendVeriCodeFrequentlyFailInfo' })
+    // }
     // [0 - 1)
     // [0 - 1) * 9000 = [0 - 9000)
     // [0 - 9000) + 1000 = [1000, 10000)
@@ -55,9 +55,12 @@ export default class UserController extends Controller {
       }
     }
     console.log(app.config.aliCloudConfig)
-    await app.redis.set(`phoneVeriCode-${phoneNumber}`, veriCode, 'ex', 60)
-    ctx.helper.success({ ctx, msg: '验证码发送成功',
-      res: app.config.env === 'local' ? { veriCode } : null })
+    // Redis 服务已禁用，暂时注释
+    // await app.redis.set(`phoneVeriCode-${phoneNumber}`, veriCode, 'ex', 60)
+    ctx.helper.success({
+      ctx, msg: '验证码发送成功',
+      res: app.config.env === 'local' ? { veriCode } : null
+    })
   }
   @inputValidate(userCreateRules, 'loginValidateFail')
   async loginByEmail() {
@@ -85,11 +88,12 @@ export default class UserController extends Controller {
   async loginByCellphone() {
     const { ctx, app } = this
     const { phoneNumber, veriCode } = ctx.request.body
-    // 验证码是否正确
-    const preVeriCode = await app.redis.get(`phoneVeriCode-${phoneNumber}`)
-    if (veriCode !== preVeriCode) {
-      return ctx.helper.error({ ctx, errorType: 'loginVeriCodeIncorrectFailInfo' })
-    }
+    // 验证码是否正确 - Redis 服务已禁用，暂时注释
+    // const preVeriCode = await app.redis.get(`phoneVeriCode-${phoneNumber}`)
+    // if (veriCode !== preVeriCode) {
+    //   return ctx.helper.error({ ctx, errorType: 'loginVeriCodeIncorrectFailInfo' })
+    // }
+    // 本地开发环境下，直接跳过验证码验证
     const token = await ctx.service.user.loginByCellphone(phoneNumber)
     ctx.helper.success({ ctx, res: { token } })
   }
