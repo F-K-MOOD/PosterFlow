@@ -57,9 +57,11 @@ watch(isOutside, (newValue) => {
 
 // 支持键盘监听事件, 监听Enter键和Escape键
 useKeyPress('Enter', () => {
+  // 校验输入值是否为空, 如果为空, 则不触发事件
   if (!validateCheck.value) {
     return
   }
+  // 只有在编辑状态下, 才触发事件
   if (isEditing.value) {
     isEditing.value = false
     emits('change', innerValue.value) 

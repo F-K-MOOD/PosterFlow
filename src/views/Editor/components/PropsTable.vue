@@ -4,6 +4,7 @@ import { reduce } from 'lodash-es'
 import type { VNode } from 'vue'
 import { computed } from 'vue'
 
+import BackgroundProcesser from '@/components/BackgroundProcesser.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ImageProcesser from '@/components/ImageProcesser.vue'
 import ShadowPicker from '@/components/ShadowPicker.vue'
@@ -27,6 +28,7 @@ defineOptions({
     InputNumber,
     Input,
     ShadowPicker,
+    BackgroundProcesser
   },
 })
 
@@ -44,15 +46,17 @@ interface FormProps {
 
 // 定义组件props 与 emits
 interface PropsTableProps {
-  props: Record<string, any>;
+  props?: Record<string, any>;
 }
-const props = defineProps<PropsTableProps>()
+const props = withDefaults(defineProps<PropsTableProps>(), {
+  props: () => ({})
+})
 const emits = defineEmits(['change'])
 
 const finalProps = computed(() => {
   return reduce(props.props, (result, value, key) => {
     // 这里的key是components列表里面的中的id, name, props里面的key
-    const newKey = key 
+    const newKey = key
     const item = mapPropsToForms[newKey]
     if (item) {
       const { valueProp = 'value', eventName = 'change', initialTransform } = item
@@ -62,9 +66,9 @@ const finalProps = computed(() => {
         valueProp,
         eventName,
         events: {
-          [eventName]: (e: any) => { 
+          [eventName]: (e: any) => {
             console.log('change', e)
-            emits('change', { key: newKey, value: item.afterTransform ? item.afterTransform(e) : e }) 
+            emits('change', { key: newKey, value: item.afterTransform ? item.afterTransform(e) : e })
           }
         }
       }
@@ -88,7 +92,7 @@ const finalProps = computed(() => {
       <component 
         :is="value.component" 
         v-if="value" 
-        :value="value.value"
+        :value="value.value" 
         v-bind="value.extraProps" 
         v-on="value.events"
       >

@@ -12,6 +12,7 @@ import type { ComponentData } from '@/store/modules/editor/helper'
 
 import PFComponentsList from './components/ComponentsList.vue'
 import PFEditWrapper from './components/EditWrapper.vue'
+import PropsTable from './components/PropsTable.vue'
 
 export type TabType = 'component' | 'layer' | 'page'
 
@@ -60,6 +61,11 @@ function handleChangeLayerListOrder (list: ComponentData[]) {
 
 // 标签页(组件属性, 图层设置, 页面设置)
 const activePanel = ref<TabType>('component') 
+const page = computed(() => editorStore.state.page)
+
+function pageChange (data: { key: string; value: any }) {
+  editorStore.updatePage(data)
+}
 </script>
 
 <template>
@@ -75,7 +81,7 @@ const activePanel = ref<TabType>('component')
       <Layout class="main-layout">
         <LayoutContent class="preview-container">
           <p>画布区域</p>
-          <div id="canvas-area" class="preview-list">
+          <div id="canvas-area" class="preview-list" :style="page.props">
             <PFEditWrapper 
               v-for="component in components" 
               :id="component.id" 
@@ -121,9 +127,9 @@ const activePanel = ref<TabType>('component')
               @select="setActive"
             />
           </TabPane>
-          <!-- <a-tab-pane key="page" tab="页面设置">
-            <props-table :props="page.props" @change="pageChange" />
-          </a-tab-pane> -->
+          <TabPane key="page" tab="页面设置">
+            <PropsTable :props="page.props" @change="pageChange" />
+          </TabPane>
         </Tabs>       
       </LayoutSider>
     </Layout>

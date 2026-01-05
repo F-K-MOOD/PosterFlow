@@ -1,6 +1,7 @@
 import { h, type VNode } from 'vue'
 
-import type { TextComponentProps } from "./TextComponentProps"
+import type { AllFormProps } from '@/store/modules/editor/helper'
+
 
 const fontFamilyArr = [
   { text: '宋体', value: '"SimSun","STSong"' },
@@ -13,16 +14,15 @@ const fontFamilyOptions = fontFamilyArr.map(font => {
   return {
     value: font.value,
     text: h('span', { style: { fontFamily: font.value } }, font.text)
-}
+  }
 })
 
 export interface PropToForm {
-  events: any
   component: string
   subComponent?: string
-  options?: {text: string | VNode, value: any}[]
-  valueProp?:string
-  value?:string
+  options?: { text: string | VNode, value: any }[]
+  valueProp?: string
+  value?: string
   extraProps?: Record<string, any>
   text?: string
   initialTransform?: (value: any) => any
@@ -30,7 +30,7 @@ export interface PropToForm {
   eventName?: string;
 }
 export type PropsToForms = {
-  [key in keyof TextComponentProps]?: PropToForm
+  [key in keyof AllFormProps]?: PropToForm
 }
 
 const defaultHandler = {
@@ -63,7 +63,7 @@ export const mapPropsToForms: Record<string, any> = {
     text: '行高',
     component: 'Slider',
     extraProps: { min: 0, max: 30, step: 0.1 },
-    initalTransform: (v: string) => parseFloat(v),
+    initialTransform: (v: string) => parseFloat(v),
     afterTransform: (e: number) => e.toString(),
   },
   textAlign: {
@@ -79,7 +79,7 @@ export const mapPropsToForms: Record<string, any> = {
   },
   fontFamily: {
     component: 'Select',
-    subComponent: 'SelectOption', 
+    subComponent: 'SelectOption',
     text: '字体',
     options: [
       { value: '', text: '无' },
@@ -88,21 +88,21 @@ export const mapPropsToForms: Record<string, any> = {
   },
   fontWeight: {
     component: 'IconSwitch',
-    initalTransform: (v: string) => v === 'bold',
+    initialTransform: (v: string) => v === 'bold',
     afterTransform: (e: boolean) => e ? 'bold' : 'normal',
     valueProp: 'checked',
     extraProps: { iconName: 'BoldOutlined', tip: '加粗' }
   },
   fontStyle: {
-    component: 'IconSwitch',  
-    initalTransform: (v: string) => v === 'italic',
+    component: 'IconSwitch',
+    initialTransform: (v: string) => v === 'italic',
     afterTransform: (e: boolean) => e ? 'italic' : 'normal',
     valueProp: 'checked',
     extraProps: { iconName: 'ItalicOutlined', tip: '斜体' }
   },
   textDecoration: {
     component: 'IconSwitch',
-    initalTransform: (v: string) => v === 'underline',
+    initialTransform: (v: string) => v === 'underline',
     afterTransform: (e: boolean) => e ? 'underline' : 'none',
     valueProp: 'checked',
     extraProps: { iconName: 'UnderlineOutlined', tip: '下划线' }
@@ -178,7 +178,7 @@ export const mapPropsToForms: Record<string, any> = {
   opacity: {
     component: 'Slider',
     text: '透明度',
-    initalTransform: (v: number) => v ? v * 100 : 100,
+    initialTransform: (v: number) => v ? v * 100 : 100,
     afterTransform: (e: number) => (e / 100),
     extraProps: { min: 0, max: 100, reverse: true }
   },
@@ -214,12 +214,11 @@ export const mapPropsToForms: Record<string, any> = {
   backgroundImage: {
     ...defaultHandler,
     component: 'BackgroundProcesser',
-    initalTransform: (v: string) => {
+    initialTransform: (v: string) => {
       if (v) {
         const reg = /\(["'](.+)["']\)/g
         const matches = reg.exec(v)
         if (matches && matches.length > 1) {
-          console.log(matches)
           return matches[1]
         } else {
           return ''
