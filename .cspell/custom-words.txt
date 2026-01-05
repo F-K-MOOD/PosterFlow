@@ -1,3 +1,4 @@
+添加物料到pinia中的ediotor仓库
 alicloud
 aliyuncs
 autod

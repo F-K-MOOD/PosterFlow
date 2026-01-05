@@ -65,6 +65,7 @@ const editGroups = computed(() => {
     const propsMap = {} as AllComponentProps
     group.items.forEach(item => {
       const key = item as keyof AllComponentProps
+      // propsMap 数据类型为propsTable组件的props类型, 对象里面是key-value对
       propsMap[key] = props.props[key]
     })
     return {
@@ -73,7 +74,7 @@ const editGroups = computed(() => {
     }
   })
 })
-const handleChange = (e: any) => {
+const handleChange = (e: { key: string; value: any }) => {
   emits('change', e)
 }
 </script>

@@ -109,7 +109,6 @@ function postFile(uploadFile: UploadFile) {
   }).then(res => {
     uploadFile.status = 'success'
     uploadFile.resp = res.data
-    console.log('Upload response:', res.data.data)
     emits('success', { resp: res.data, file: uploadFile, list: uploadedFiles.value })
   }).catch(e => {
     uploadFile.status = 'error'

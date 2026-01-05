@@ -35,8 +35,6 @@ function onItemClick(item: Record<string, any>) {
 
 function onImageUploaded(data: { resp: RespUploadData; file: File }) {
   const { resp, file } = data
-  console.log('onImageUploaded data:', data)
-  console.log('resp.data:', resp.data)
   const componentData: ComponentData = {
     id: uuidv4(),
     name: 'PFImage',
@@ -47,12 +45,11 @@ function onImageUploaded(data: { resp: RespUploadData; file: File }) {
   // 检查urls是否存在且不为空
   if (resp.data && resp.data.urls && resp.data.urls.length > 0) {
     componentData.props.src = resp.data.urls[0]
-    message.success('图片上传成功')
-    emits('on-item-click', componentData)
     getImageDimensions(file).then(({ width }) => {
       const maxWidth = 373
       componentData.props.width = ((width > maxWidth) ? maxWidth : width) + 'px'
       emits('on-item-click', componentData)
+      message.success('图片上传成功')
     })
   } else {
     message.error('图片上传失败：未获取到图片URL')

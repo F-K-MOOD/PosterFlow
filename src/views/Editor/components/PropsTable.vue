@@ -8,6 +8,7 @@ import BackgroundProcesser from '@/components/BackgroundProcesser.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ImageProcesser from '@/components/ImageProcesser.vue'
 import ShadowPicker from '@/components/ShadowPicker.vue'
+import type { AllComponentProps } from '@/store/modules/editor/helper'
 import type { PropsToForms } from '@/types/propsMap'
 import { mapPropsToForms } from '@/types/propsMap'
 
@@ -41,24 +42,26 @@ interface FormProps {
   options?: { text: string | VNode; value: any }[];
   valueProp?: string;
   eventName?: string;
-  events?: Record<string, (e: any) => void>;
+  events: Record<string, (e: any) => void>;
 }
 
 // 定义组件props 与 emits
 interface PropsTableProps {
-  props?: Record<string, any>;
+  props: AllComponentProps;
 }
-const props = withDefaults(defineProps<PropsTableProps>(), {
-  props: () => ({})
-})
+const props = defineProps<PropsTableProps>()
 const emits = defineEmits(['change'])
 
+// 处理props, 转换为表单props
 const finalProps = computed(() => {
   return reduce(props.props, (result, value, key) => {
     // 这里的key是components列表里面的中的id, name, props里面的key
     const newKey = key
+    // 获取需要使用组件来展示的属性, 
     const item = mapPropsToForms[newKey]
     if (item) {
+      // 对item进行在加工,如果有initialTransform, 则对value进行加工
+      // 然后添加事件处理函数, 统一处理change事件, 并将事件参数进行加工, 处理后为{ key: string, value: any }
       const { valueProp = 'value', eventName = 'change', initialTransform } = item
       const newItem: FormProps = {
         ...item,
@@ -67,7 +70,8 @@ const finalProps = computed(() => {
         eventName,
         events: {
           [eventName]: (e: any) => {
-            console.log('change', e)
+            // 对事件参数进行加工, 如果有afterTransform, 则对事件参数进行加工
+            // 如果e不是改变的值, 而是事件对象, 相应地进行e.target.value, 在函数里进行处理
             emits('change', { key: newKey, value: item.afterTransform ? item.afterTransform(e) : e })
           }
         }

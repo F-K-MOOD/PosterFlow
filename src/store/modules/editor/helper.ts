@@ -1,8 +1,8 @@
 import type { ImageComponentProps } from '@/types/ImageComponentProps'
+import type { ShapeComponentProps } from '@/types/ShapeComponentProps'
 import type { TextComponentProps } from '@/types/TextComponentProps'
 
-
-export type AllComponentProps = TextComponentProps & ImageComponentProps
+export type AllComponentProps = TextComponentProps & ImageComponentProps & ShapeComponentProps
 export type AllFormProps = PageProps & AllComponentProps
 
 export interface EditorProps {

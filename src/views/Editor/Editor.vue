@@ -22,7 +22,6 @@ defineOptions({
 
 const editorStore = useEditorStore()
 const components = computed(() => editorStore.state.components)
-const activeComponent = computed<ComponentData | undefined>(() => editorStore.state.components.find((item) => item.id === editorStore.state.currentElement))
 
 // 创建组件映射，用于动态渲染不同类型的组件
 const componentMap = {
@@ -31,12 +30,20 @@ const componentMap = {
   Textarea,
 }
 
+// 处理物料区点击事件, 添加物料到pinia中的ediotor仓库, 进而在画布区进行展示
+// 处理物料区上传图片,
 const addItem = (item: ComponentData) => {
   editorStore.addComponent(item)
 }
+
+// 点击画布区的组件, 使其成为激活状态, 并在属性面板展示其属性
+const activeComponent = computed<ComponentData | undefined>(() => {
+  return editorStore.state.components.find((item) => item.id === editorStore.state.currentElement)
+})
 const setActive = (id: string) => {
   editorStore.setActive(id)
 }
+
 // 更新组件属性
 function handleChangeComponentProps (data: { key: string; value: any }) {
   if (activeComponent.value) {
@@ -99,7 +106,7 @@ function pageChange (data: { key: string; value: any }) {
           </div>
         </LayoutContent>
       </Layout>
-      <!-- 组件属性, 配置 -->
+      <!-- 配置区 -->
       <LayoutSider width="300" class="settings-panel">
         <Tabs v-model:activeKey="activePanel" type="card">
           <TabPane key="component" tab="属性设置" class="no-top-radius">
