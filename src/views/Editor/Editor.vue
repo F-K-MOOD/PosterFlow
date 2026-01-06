@@ -73,6 +73,11 @@ const page = computed(() => editorStore.state.page)
 function pageChange (data: { key: string; value: any }) {
   editorStore.updatePage(data)
 }
+
+// 处理画布区鼠标拖动元素
+function handleUpdatePosition (data: { id: string; left?: string; top?: string; width?: string; height?: string }) {
+  editorStore.handleUpdatePosition(data)
+}
 </script>
 
 <template>
@@ -96,6 +101,7 @@ function pageChange (data: { key: string; value: any }) {
               :props="component.props" 
               :active="!!activeComponent && activeComponent.id === component.id"
               @set-active="setActive"
+              @update-position="handleUpdatePosition"
             >
               <component 
                 :is="componentMap[component.name]" 
