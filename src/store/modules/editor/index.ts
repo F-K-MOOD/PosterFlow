@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { v4 as uuidv4 } from 'uuid'
 import { computed, reactive } from 'vue'
 
-import { imageComponentProps } from '@/constants/imageComponentProps'
+// import { imageComponentProps } from '@/constants/imageComponentProps'
 import { pageProps } from '@/constants/pageProps'
 import { textComponentProps } from '@/constants/textComponentProps'
 
@@ -33,48 +33,48 @@ export const useEditorStore = defineStore('editor', () => {
           top: '150px'
         }
       },
-      {
-        id: uuidv4(),
-        name: 'PFText',
-        layerName: '图层2',
-        page: {},
-        props: {
-          ...textComponentProps,
-          text: 'hello2',
-          fontSize: '10px',
-          fontWeight: 'bold',
-          lineHeight: '2',
-          textAlign: 'left',
-          fontFamily: ''
-        }
-      },
-      {
-        id: uuidv4(),
-        name: 'PFText',
-        layerName: '图层3',
-        page: {},
-        props: {
-          ...textComponentProps,
-          text: 'hello3',
-          fontSize: '15px',
-          actionType: 'url',
-          url: 'https://www.baidu.com',
-          lineHeight: '3',
-          textAlign: 'left',
-          fontFamily: ''
-        }
-      },
-      {
-        id: uuidv4(),
-        name: 'PFImage',
-        layerName: '图层4',
-        page: {},
-        props: {
-          ...imageComponentProps,
-          src: 'https://pf-server.oss-cn-beijing.aliyuncs.com/my-test%5CLUq2Ou.png',
-          width: '100px'
-        }
-      },
+      // {
+      //   id: uuidv4(),
+      //   name: 'PFText',
+      //   layerName: '图层2',
+      //   page: {},
+      //   props: {
+      //     ...textComponentProps,
+      //     text: 'hello2',
+      //     fontSize: '10px',
+      //     fontWeight: 'bold',
+      //     lineHeight: '2',
+      //     textAlign: 'left',
+      //     fontFamily: ''
+      //   }
+      // },
+      // {
+      //   id: uuidv4(),
+      //   name: 'PFText',
+      //   layerName: '图层3',
+      //   page: {},
+      //   props: {
+      //     ...textComponentProps,
+      //     text: 'hello3',
+      //     fontSize: '15px',
+      //     actionType: 'url',
+      //     url: 'https://www.baidu.com',
+      //     lineHeight: '3',
+      //     textAlign: 'left',
+      //     fontFamily: ''
+      //   }
+      // },
+      // {
+      //   id: uuidv4(),
+      //   name: 'PFImage',
+      //   layerName: '图层4',
+      //   page: {},
+      //   props: {
+      //     ...imageComponentProps,
+      //     src: 'https://pf-server.oss-cn-beijing.aliyuncs.com/my-test%5CLUq2Ou.png',
+      //     width: '100px'
+      //   }
+      // },
     ],
     currentElement: '',
     page: {
@@ -82,7 +82,8 @@ export const useEditorStore = defineStore('editor', () => {
       title: 'test title'
     }
   })
-  // 添加组件
+  //* 物料区
+  // 物料区添加物料
   function addComponent(props: ComponentData) {
     const newComponent: ComponentData = {
       id: uuidv4(),
@@ -94,7 +95,7 @@ export const useEditorStore = defineStore('editor', () => {
     }
     state.components.push(newComponent)
   }
-  // 删除组件
+  // 删除物料
   function removeComponent(id: string) {
     if (!id) {
       state.components.pop()
@@ -103,16 +104,39 @@ export const useEditorStore = defineStore('editor', () => {
       state.components = state.components.filter((item) => item.id !== id)
     }
   }
-  // 设置当前选中的组件
-  function setActive(id: string) {
-    state.currentElement = id
 
-  }
-  // 获取当前选中的组件
+  //? 画布区
+  // 画布区 获取当前选中的组件
   const activeComponent = computed(() => {
     return state.components.find((item) => item.id === state.currentElement)
   })
-  // 更新组件属性
+  // 画布区 设置当前选中的组件
+  function setActive(id: string) {
+    state.currentElement = id
+  }
+  // 画布区更新组件位置
+  function handleUpdatePosition(data: { id: string; left?: string; top?: string; width?: string; height?: string }) {
+    const { id, left, top, width, height } = data
+    state.components = state.components.map((item) => {
+      if (item.id === id) {
+        return {
+          ...item,
+          props: {
+            ...item.props,
+            left: left ? left : item.props.left,
+            top: top ? top : item.props.top,
+            width: width ? width : item.props.width,
+            height: height ? height : item.props.height,
+          }
+        }
+      } else {
+        return item
+      }
+    })
+  }
+
+  //! 右侧配置区
+  // 右侧配置区 更新组件属性
   function updateComponent(data: ComponentData) {
     const { id, isHidden, isLocked, layerName, isRoot, props } = data
     let component: ComponentData | undefined
@@ -147,17 +171,18 @@ export const useEditorStore = defineStore('editor', () => {
       }
     })
   }
-  // 更新组件列表
+  // 右侧配置区 更新图层顺序
   function updateComponentList(list: ComponentData[]) {
     state.components = list
   }
-  // 更新页面属性
+  // 右侧配置区 更新页面属性
   function updatePage(data: { key: string; value: any }) {
     state.page.props = {
       ...state.page.props || {},
       ...data.value
     }
   }
+
   // 更新页面
   return {
     state,
@@ -167,6 +192,7 @@ export const useEditorStore = defineStore('editor', () => {
     setActive,
     updateComponent,
     updateComponentList,
-    updatePage
+    updatePage,
+    handleUpdatePosition
   }
 })
