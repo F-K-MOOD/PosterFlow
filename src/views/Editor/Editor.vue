@@ -7,6 +7,7 @@ import LayerList from '@/components/LayerList.vue'
 import PFImage from '@/components/PFImage.vue'
 import PFText from '@/components/PFText.vue'
 import defaultTextTemplates from '@/constants/defaultTemplates'
+import initContextMenu from '@/plugins/contextMenu'
 import initHotKeys from '@/plugins/hotKeys'
 import { useEditorStore } from '@/store/modules/editor';
 import type { ComponentData } from '@/store/modules/editor/helper'
@@ -84,6 +85,8 @@ function handleUpdatePosition(data: { id: string; left?: string; top?: string; w
 
 // 初始化热键
 initHotKeys()
+// 初始化鼠标右键点击画布, 显示右键菜单
+initContextMenu()
 </script>
 
 <template>
