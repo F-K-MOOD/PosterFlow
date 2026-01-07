@@ -164,6 +164,7 @@ function startResize(direction: ResizeDirection) {
     class="edit-wrapper"
     :class="{'active': active}" 
     :style="styles"
+    :data-component-id="props.id"
     @click="onItemClick(props.id)"
     @mousedown="handleDragStart"
   >
