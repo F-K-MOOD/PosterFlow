@@ -1,20 +1,16 @@
-import {reactive} from 'vue'
-export const defaultTemplates = reactive([
+import { textDefaultProps } from 'lego-bricks'
+const defaultTextTemplates = [
   {
     text: '大标题',
-    fontSize: '30',
+    fontSize: '30px',
     fontWeight: 'bold',
     tag: 'h2',
     width: '100px',
-    lineHeight: '5',
-    fontFamily: '"SimHei","微软雅黑"',
-    textAlign: 'center',
   },
   {
     text: '正文内容',
     tag: 'p',
     width: '100px',
-    lineHeight: '5',
   },
   {
     text: '链接内容',
@@ -22,7 +18,6 @@ export const defaultTemplates = reactive([
     textDecoration: 'underline',
     tag: 'p',
     width: '100px',
-    lineHeight: '5',
   },
   {
     text: '按钮内容',
@@ -40,7 +35,6 @@ export const defaultTemplates = reactive([
     tag: 'button',
     textAlign: 'center',
     position: 'absolute',
-    lineHeight: '5',
   }
-])
-
+]
+export default defaultTextTemplates.map(template => ({ ...textDefaultProps, ...template }))

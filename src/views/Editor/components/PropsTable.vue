@@ -70,9 +70,21 @@ const finalProps = computed(() => {
         eventName,
         events: {
           [eventName]: (e: any) => {
-            // 对事件参数进行加工, 如果有afterTransform, 则对事件参数进行加工
-            // 如果e不是改变的值, 而是事件对象, 相应地进行e.target.value, 在函数里进行处理
-            emits('change', { key: newKey, value: item.afterTransform ? item.afterTransform(e) : e })
+            // 确保只有用户交互才触发更新，而不是初始化时
+            // 对于 InputNumber 组件，e 是数字值
+            // 对于其他组件，e 可能是事件对象
+            let actualValue = e
+            if (e && typeof e === 'object' && 'target' in e) {
+              actualValue = (e.target as HTMLInputElement).value
+            }
+
+            // 计算转换后的值
+            const transformedValue = item.afterTransform ? item.afterTransform(actualValue) : actualValue
+
+            // 只有当值真正改变时才触发更新
+            if (transformedValue !== value) {
+              emits('change', { key: newKey, value: transformedValue })
+            }
           }
         }
       }

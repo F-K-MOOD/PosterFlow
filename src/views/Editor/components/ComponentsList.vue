@@ -6,6 +6,7 @@ import PFText from '@/components/PFText.vue';
 import StyledUploader from '@/components/StyledUploader.vue'
 import { imageComponentProps } from '@/constants/imageComponentProps';
 import type { ComponentData } from '@/store/modules/editor/helper';
+import type { AllComponentProps } from '@/store/modules/editor/helper';
 import type { RespUploadData } from '@/types/respTypes';
 import { getImageDimensions } from '@/utils/getImageDimensions'
 
@@ -15,7 +16,7 @@ defineOptions({
 
 // 定义组件props 与 emits
 interface ComponentsListProps {
-  list: Record<string, any>[]
+  list: Partial<AllComponentProps>[]
 }
 const props = defineProps<ComponentsListProps>()
 const emits = defineEmits<{
@@ -23,7 +24,7 @@ const emits = defineEmits<{
 }>()
 
 
-function onItemClick(item: Record<string, any>) {
+function onItemClick(item: Partial<AllComponentProps>) {
   // 为文本组件添加name字段
   const componentData = {
     id: uuidv4(),
