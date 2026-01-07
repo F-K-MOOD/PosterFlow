@@ -6,11 +6,50 @@ export type AllComponentProps = TextComponentProps & ImageComponentProps & Shape
 export type AllFormProps = PageProps & AllComponentProps
 
 export interface EditorProps {
-  components: ComponentData[]; // 供中间编译器渲染的数组
-  currentElement: string; // 当前选中的元素 uuid
+  // 供中间编译器渲染的数组
+  components: ComponentData[]; 
+  // 当前选中的元素 uuid
+  currentElement: string; 
   page: PageData;
+  // 当前被复制的组件
+  copiedComponent?: ComponentData;
+  // 当前操作的历史记录
+  histories: HistoryRecord[];
+  // 当前历史记录的操作位置
+  historyIndex: number;
+  // 开始更新时的缓存值
+  // cachedOldValues: any;
+  // 保存最多历史条目记录数
+  maxHistoryNumber: number;
+  // 数据是否有修改
+  // isDirty: boolean;
+  // 当前 work 的 channels
+  // channels: ChannelProps[];
 }
-
+export interface ComponentData {
+  // 这个元素的 属性，属性请详见下面
+  props: Partial<AllComponentProps>;
+  // id，uuid v4 生成
+  id: string;
+  // 业务组件库名称 l-text，l-image 等等 
+  name: string;
+  page?: PageData;
+  // 图层是否隐藏
+  isHidden?: boolean;
+  // 图层是否锁定
+  isLocked?: boolean;
+  // 图层名称
+  layerName?: string;
+  // 是否是根组件
+  isRoot?: boolean;
+}
+export interface HistoryRecord {
+  id: string;
+  componentId: string;
+  type: 'add' | 'delete' | 'modify';
+  data: any;
+  index?: number;
+}
 export interface PageData {
   id?: number;
   props?: PageProps;
@@ -32,29 +71,16 @@ export interface PageData {
     userName: string;
   };
 }
-
+export interface ChannelProps {
+  id: number;
+  name: string;
+  workId: number;
+  status: number;
+}
 export interface PageProps {
   backgroundColor: string;
   backgroundImage: string;
   backgroundRepeat: string;
   backgroundSize: string;
   height: string;
-}
-
-export interface ComponentData {
-  // 这个元素的 属性，属性请详见下面
-  props: Partial<AllComponentProps>;
-  // id，uuid v4 生成
-  id: string;
-  // 业务组件库名称 l-text，l-image 等等 
-  name: string;
-  page?: PageData;
-  // 图层是否隐藏
-  isHidden?: boolean;
-  // 图层是否锁定
-  isLocked?: boolean;
-  // 图层名称
-  layerName?: string;
-  // 是否是根组件
-  isRoot?: boolean;
 }

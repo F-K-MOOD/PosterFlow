@@ -43,8 +43,19 @@ const defaultHandler = {
 
 const pxToNumberHandler: PropToForm = {
   component: 'InputNumber',
-  initialTransform: (v: string) => v ? parseInt(v) : 0,
-  afterTransform: (e: number) => e ? `${e}px` : '',
+  // 确保初始转换和反向转换是对称的
+  initialTransform: (v: string) => {
+    if (!v) return 0;
+    // 保留原始值的数字部分，处理 'px' 后缀
+    const num = parseInt(v, 10);
+    return isNaN(num) ? 0 : num;
+  },
+  afterTransform: (e: number) => {
+    if (e === undefined || e === null) return '';
+    // 确保转换后的值与初始值格式一致
+    const num = Number(e);
+    return isNaN(num) ? '' : `${num}px`;
+  },
 }
 
 export const mapPropsToForms: Record<string, any> = {

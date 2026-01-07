@@ -6,12 +6,14 @@ import EditGroup from '@/components/EditGroup.vue'
 import LayerList from '@/components/LayerList.vue'
 import PFImage from '@/components/PFImage.vue'
 import PFText from '@/components/PFText.vue'
-import { defaultTemplates } from '@/constants/defaultTemplates'
+import defaultTextTemplates from '@/constants/defaultTemplates'
+import initHotKeys from '@/plugins/hotKeys'
 import { useEditorStore } from '@/store/modules/editor';
 import type { ComponentData } from '@/store/modules/editor/helper'
 
 import PFComponentsList from './components/ComponentsList.vue'
 import PFEditWrapper from './components/EditWrapper.vue'
+import HistoryArea from './components/HistoryArea.vue'
 import PropsTable from './components/PropsTable.vue'
 
 export type TabType = 'component' | 'layer' | 'page'
@@ -45,8 +47,9 @@ const setActive = (id: string) => {
 }
 
 // 更新组件属性
-function handleChangeComponentProps (data: { key: string; value: any }) {
+function handleChangeComponentProps(data: { key: string; value: any }) {
   if (activeComponent.value) {
+    // 传递的是完整的props
     editorStore.updateComponent({
       id: activeComponent.value.id,
       name: activeComponent.value.name,
@@ -58,26 +61,29 @@ function handleChangeComponentProps (data: { key: string; value: any }) {
   }
 }
 // 更新图层列表属性, 隐藏/显示, 锁定/解锁
-function handleChangeLayerListMeta (data: ComponentData) {
+function handleChangeLayerListMeta(data: ComponentData) {
   editorStore.updateComponent(data)
 }
 // 更新图层列表顺序
-function handleChangeLayerListOrder (list: ComponentData[]) {  
+function handleChangeLayerListOrder(list: ComponentData[]) {
   editorStore.updateComponentList(list)
 }
 
 // 标签页(组件属性, 图层设置, 页面设置)
-const activePanel = ref<TabType>('component') 
+const activePanel = ref<TabType>('component')
 const page = computed(() => editorStore.state.page)
 
-function pageChange (data: { key: string; value: any }) {
+function pageChange(data: { key: string; value: any }) {
   editorStore.updatePage(data)
 }
 
 // 处理画布区鼠标拖动元素
-function handleUpdatePosition (data: { id: string; left?: string; top?: string; width?: string; height?: string }) {
+function handleUpdatePosition(data: { id: string; left?: string; top?: string; width?: string; height?: string }) {
   editorStore.handleUpdatePosition(data)
 }
+
+// 初始化热键
+initHotKeys()
 </script>
 
 <template>
@@ -86,13 +92,14 @@ function handleUpdatePosition (data: { id: string; left?: string; top?: string; 
       <!-- 物料库 -->
       <LayoutSider width="300" class="sider-container">
         <div class="sider-content">
-          <PFComponentsList :list="defaultTemplates" @on-item-click="addItem" />
+          <PFComponentsList :list="defaultTextTemplates" @on-item-click="addItem" />
         </div>
       </LayoutSider>
       <!-- 画布区域 -->
       <Layout class="main-layout">
         <LayoutContent class="preview-container">
           <p>画布区域</p>
+          <HistoryArea />
           <div id="canvas-area" class="preview-list" :style="page.props">
             <PFEditWrapper 
               v-for="component in components" 
@@ -100,13 +107,13 @@ function handleUpdatePosition (data: { id: string; left?: string; top?: string; 
               :key="component.id"
               :props="component.props" 
               :active="!!activeComponent && activeComponent.id === component.id"
-              @set-active="setActive"
+              @set-active="setActive" 
               @update-position="handleUpdatePosition"
             >
               <component 
                 :is="componentMap[component.name]" 
                 v-bind="component.props"
-                v-if="componentMap[component.name]"
+                v-if="componentMap[component.name]" 
               />
             </PFEditWrapper>
           </div>
@@ -120,7 +127,7 @@ function handleUpdatePosition (data: { id: string; left?: string; top?: string; 
               <edit-group 
                 v-if="!activeComponent.isLocked" 
                 :props="activeComponent.props"
-                @change="handleChangeComponentProps"
+                @change="handleChangeComponentProps" 
               />
               <div v-else>
                 <Empty>
@@ -130,20 +137,20 @@ function handleUpdatePosition (data: { id: string; left?: string; top?: string; 
                 </Empty>
               </div>
             </div>
-        </TabPane>
+          </TabPane>
           <TabPane key="layer" tab="图层设置">
             <layer-list 
               :list="components" 
-              :selected-id="activeComponent && activeComponent.id" 
-              @change-list="handleChangeLayerListOrder"
-              @change="handleChangeLayerListMeta"
-              @select="setActive"
+              :selected-id="activeComponent && activeComponent.id"
+              @change-list="handleChangeLayerListOrder" 
+              @change="handleChangeLayerListMeta" 
+              @select="setActive" 
             />
           </TabPane>
           <TabPane key="page" tab="页面设置">
             <PropsTable :props="page.props" @change="pageChange" />
           </TabPane>
-        </Tabs>       
+        </Tabs>
       </LayoutSider>
     </Layout>
   </div>
