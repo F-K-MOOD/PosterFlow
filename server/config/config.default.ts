@@ -15,7 +15,7 @@ export default (appInfo: EggAppInfo) => {
     csrf: {
       enable: false
     },
-    domainWhiteList: ['http://localhost:5173']
+    domainWhiteList: ['http://localhost:5173', 'http://localhost:5174']
   }
   config.view = {
     defaultViewEngine: 'nunjucks'
@@ -34,8 +34,8 @@ export default (appInfo: EggAppInfo) => {
   }
   config.jwt = {
     enable: true,
-    secret: process.env.JWT_SECRET || '',
-    match: ['/api/users/getUserInfo', '/api/works', '/api/channel']
+    secret: process.env.JWT_SECRET || 'your-secret-key-change-me-in-production',
+    match: ['/api/users/getUserInfo', '/api/users/update', '/api/works', '/api/channel']
   }
   config.redis = {
     client: {
@@ -56,7 +56,14 @@ export default (appInfo: EggAppInfo) => {
     ]
   }
   config.cors = {
-    origin: 'http://localhost:5173',
+    origin: ctx => {
+      const allowOrigins = ['http://localhost:5173', 'http://localhost:5174'];
+      const origin = ctx.header.origin || allowOrigins[0];
+      if (allowOrigins.includes(origin as string)) {
+        return origin;
+      }
+      return allowOrigins[0];
+    },
     allowMethods: 'GET,HEAD,PUT,OPTIONS,POST,DELETE,PATCH'
   }
   config.oss = {

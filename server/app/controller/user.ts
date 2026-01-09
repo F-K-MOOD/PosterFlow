@@ -9,7 +9,7 @@ const sendCodeRules = {
 }
 const userPhoneCreateRules = {
   phoneNumber: { type: 'string', format: /^1[3-9]\d{9}$/, message: '手机号码格式错误' },
-  veriCode: { type: 'string', format: /^\d{4}$/, message: '验证码格式错误' }
+  verifyCode: { type: 'string', format: /^\d{4}$/, message: '验证码格式错误' }
 }
 
 export default class UserController extends Controller {
@@ -45,21 +45,21 @@ export default class UserController extends Controller {
     // [0 - 1)
     // [0 - 1) * 9000 = [0 - 9000)
     // [0 - 9000) + 1000 = [1000, 10000)
-    const veriCode = (Math.floor(((Math.random() * 9000) + 1000))).toString()
+    const verifyCode = (Math.floor(((Math.random() * 9000) + 1000))).toString()
     // 发送短信
     // 判断是否为生产环境
     if (app.config.env === 'prod') {
-      const resp = await this.service.user.sendSMS(phoneNumber, veriCode)
+      const resp = await this.service.user.sendSMS(phoneNumber, verifyCode)
       if (resp.body.code !== 'OK') {
         return ctx.helper.error({ ctx, errorType: 'sendVeriCodeError' })
       }
     }
     console.log(app.config.aliCloudConfig)
     // Redis 服务已禁用，暂时注释
-    // await app.redis.set(`phoneVeriCode-${phoneNumber}`, veriCode, 'ex', 60)
+    // await app.redis.set(`phoneVeriCode-${phoneNumber}`, verifyCode, 'ex', 60)
     ctx.helper.success({
       ctx, msg: '验证码发送成功',
-      res: app.config.env === 'local' ? { veriCode } : null
+      res: app.config.env === 'local' ? { verifyCode } : null
     })
   }
   @inputValidate(userCreateRules, 'loginValidateFail')
@@ -81,16 +81,16 @@ export default class UserController extends Controller {
     // ctx.session.username = user.username
     // Registered claims 注册相关的信息
     // Public claims 公共信息: should be unique like email, address or phone_number
-    const token = app.jwt.sign({ username: user.username, _id: user._id }, app.config.jwt.secret, { expiresIn: app.config.jwtExpires })
+    const token = app.jwt.sign({ username: user.username }, app.config.jwt.secret, { expiresIn: app.config.jwtExpires })
     ctx.helper.success({ ctx, res: { token }, msg: '登录成功' })
   }
   @inputValidate(userPhoneCreateRules, 'userValidateFail')
   async loginByCellphone() {
     const { ctx, app } = this
-    const { phoneNumber, veriCode } = ctx.request.body
+    const { phoneNumber, verifyCode } = ctx.request.body
     // 验证码是否正确 - Redis 服务已禁用，暂时注释
     // const preVeriCode = await app.redis.get(`phoneVeriCode-${phoneNumber}`)
-    // if (veriCode !== preVeriCode) {
+    // if (verifyCode !== preVeriCode) {
     //   return ctx.helper.error({ ctx, errorType: 'loginVeriCodeIncorrectFailInfo' })
     // }
     // 本地开发环境下，直接跳过验证码验证
@@ -114,22 +114,38 @@ export default class UserController extends Controller {
     }
   }
   async show() {
-    const { ctx, service, app } = this
-    // const { username } = ctx.session
-    // /users/:id
-    // const username = ctx.cookies.get('username', { encrypt: true })
-    // const userData = await service.user.findById(ctx.params.id)
-    // const token = this.getTokenValue()
-    // if (!token) {
-    //   return ctx.helper.error({ ctx, errorType: 'loginValidateFail' })
-    // }
-    // try {
-    //   const decoded = verify(token, app.config.secret)
-    //   ctx.helper.success({ ctx, res: decoded })
-    // } catch (e) {
-    //   return ctx.helper.error({ ctx, errorType: 'loginValidateFail' })
-    // }
+    const { ctx, service } = this
     const userData = await service.user.findByUsername(ctx.state.user.username)
-    ctx.helper.success({ ctx, res: userData.toJSON() })
+    const rawUser = userData.toJSON()
+
+    // 手动构建符合UserDataProps接口的用户信息，确保包含所有必要字段
+    const userInfo = {
+      username: rawUser.username,
+      id: rawUser.id || String(rawUser._id) || undefined, // 使用自增id或_id的字符串形式
+      phoneNumber: rawUser.phoneNumber,
+      nickName: rawUser.nickName,
+      description: rawUser.description || undefined,
+      updatedAt: rawUser.updatedAt ? new Date(rawUser.updatedAt).toISOString() : undefined,
+      createdAt: rawUser.createdAt ? new Date(rawUser.createdAt).toISOString() : undefined,
+      picture: rawUser.picture || undefined,
+      gender: rawUser.gender || undefined,
+      // 添加token中的iat和exp字段
+      ...(ctx.state.user.iat ? { iat: ctx.state.user.iat } : {}),
+      ...(ctx.state.user.exp ? { exp: ctx.state.user.exp } : {})
+    }
+
+    ctx.helper.success({ ctx, res: userInfo })
+  }
+
+  async update() {
+    const { ctx, service } = this
+    const { nickName, gender, description, picture } = ctx.request.body
+    const updatedUser = await service.user.updateUser(ctx.state.user.username, {
+      nickName,
+      gender,
+      description,
+      picture
+    })
+    ctx.helper.success({ ctx, res: updatedUser, msg: '用户信息更新成功' })
   }
 }

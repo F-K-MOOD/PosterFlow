@@ -4,7 +4,6 @@ function getTokenValue(ctx: Context) {
   // JWT Header 格式
   // Authorization:Bearer tokenXXX
   const { authorization } = ctx.header
-  // 没有这个 header 直接返回false
   if (!ctx.header || !authorization) {
     return false
   }
@@ -16,22 +15,19 @@ function getTokenValue(ctx: Context) {
       if (/^Bearer$/i.test(scheme)) {
         return credentials
       }
-    } else {
-      return false
     }
-  } else {
-    return false
   }
+  return false
 }
-export default (options: EggAppConfig['jwt']) => {
+export default (options: EggAppConfig['jwt'], app: Application) => {
   return async (ctx: Context, next: () => Promise<any>) => {
     // 从 header 获取对应的 token
     const token = getTokenValue(ctx)
     if (!token) {
       return ctx.helper.error({ ctx, errorType: 'loginValidateFail' })
     }
-    // 判断 secret 是否存在
-    const { secret } = options
+    // 使用app.config.jwt.secret确保获取正确的密钥
+    const secret = app.config.jwt.secret
     if (!secret) {
       throw new Error('Secret not provided')
     }

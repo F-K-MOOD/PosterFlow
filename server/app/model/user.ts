@@ -14,6 +14,8 @@ export interface UserProps {
   provider?: 'gitee';
   oauthID?: string;
   role?: 'admin' | 'normal';
+  description?: string;
+  gender?: string;
 }
 
 function initUserModel(app: Application) {
@@ -28,17 +30,36 @@ function initUserModel(app: Application) {
     type: { type: String, default: 'email' },
     provider: { type: String },
     oauthID: { type: String },
-    role: { type: String, default: 'normal' }
-  }, { timestamps: true,
-    toJSON: {
-      transform(_doc, ret) {
-        delete ret.password
-        delete ret.__v
+    role: { type: String, default: 'normal' },
+    description: { type: String },
+    gender: { type: String }
+  }, {
+    timestamps: true
+  })
+
+  // 确保transform函数正确配置
+  UserSchema.set('toJSON', {
+    transform(_doc, ret) {
+      const userRet = ret as any
+      delete userRet.password
+      delete userRet.__v
+      delete userRet._id
+      delete userRet.type
+      delete userRet.role
+      delete userRet.provider
+      delete userRet.oauthID
+      delete userRet.email
+      // 确保日期格式正确
+      if (userRet.createdAt instanceof Date) {
+        userRet.createdAt = userRet.createdAt.toISOString()
+      }
+      if (userRet.updatedAt instanceof Date) {
+        userRet.updatedAt = userRet.updatedAt.toISOString()
       }
     }
   })
   UserSchema.plugin(AutoIncrement, { inc_field: 'id', id: 'users_id_counter' })
-  return app.mongoose.model<UserProps>('User', UserSchema)
+  return app.mongoose.model('User', UserSchema) as any
 }
 
 export default initUserModel

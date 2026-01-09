@@ -3,6 +3,7 @@ alicloud
 aliyuncs
 autod
 axios
+cellnumber
 commitlint
 cropperjs
 dysmsapi
@@ -12,11 +13,14 @@ hoverable
 ImageProcesser
 inital
 Kaiti
+Klick
 processer
+qrcode
 RenderVnode
 resizers
 sider
 STFangsong
 unplugin
 uuidv4
+veri
 vuedraggable
