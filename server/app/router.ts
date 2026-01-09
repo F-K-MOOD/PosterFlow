@@ -12,6 +12,7 @@ export default (app: Application) => {
   router.prefix('/api')
   router.post('/users/create', controller.user.createByEmail)
   router.get('/users/getUserInfo', controller.user.show)
+  router.put('/users/update', controller.user.update)
   router.post('/users/loginByEmail', controller.user.loginByEmail)
   router.post('/users/genVeriCode', controller.user.sendVeriCode)
   router.post('/users/loginByPhoneNumber', controller.user.loginByCellphone)

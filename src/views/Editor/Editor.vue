@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { Empty, Layout, LayoutContent, LayoutSider, TabPane, Tabs, Textarea } from 'ant-design-vue'
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 
 import EditGroup from '@/components/EditGroup.vue'
 import LayerList from '@/components/LayerList.vue'
@@ -11,6 +12,7 @@ import initContextMenu from '@/plugins/contextMenu'
 import initHotKeys from '@/plugins/hotKeys'
 import { useEditorStore } from '@/store/modules/editor';
 import type { ComponentData } from '@/store/modules/editor/helper'
+import useTemplateStore from '@/store/modules/templates'
 
 import PFComponentsList from './components/ComponentsList.vue'
 import PFEditWrapper from './components/EditWrapper.vue'
@@ -87,6 +89,18 @@ function handleUpdatePosition(data: { id: string; left?: string; top?: string; w
 initHotKeys()
 // 初始化鼠标右键点击画布, 显示右键菜单
 initContextMenu()
+
+// 从路由参数中获取模板ID
+const route = useRoute()
+const templateStore = useTemplateStore()
+const currentWorkId = computed(() => route.params.id)
+onMounted(() => {
+  if (currentWorkId.value) {
+    if (typeof currentWorkId.value === 'string') {
+      templateStore.fetchWork(currentWorkId.value)
+    } 
+  }
+})
 </script>
 
 <template>

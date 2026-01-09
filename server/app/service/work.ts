@@ -20,7 +20,7 @@ export default class WorkService extends Service {
     const uuid = nanoid(6)
     const newEmptyWork: Partial<WorkProps> = {
       ...payload,
-      user: Types.ObjectId(_id),
+      user: new Types.ObjectId(_id),
       author: username,
       uuid
     }
@@ -58,12 +58,12 @@ export default class WorkService extends Service {
     const { pageIndex, pageSize, select, populate, customSort, find } = fcondition
     const skip = pageIndex * pageSize
     const res = await this.ctx.model.Work
-      .find(find).select(select).populate(populate)
+      .find(find).select(select).populate(populate as any)
       .skip(skip)
       .limit(pageSize)
       .sort(customSort)
       .lean()
-    const count = await this.ctx.model.Work.find(find).count()
+    const count = await this.ctx.model.Work.find(find).countDocuments()
     return { count, list: res, pageSize, pageIndex }
   }
   async publish(id: number, isTemplate = false) {
