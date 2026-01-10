@@ -63,8 +63,22 @@ export default class WorkService extends Service {
       .limit(pageSize)
       .sort(customSort)
       .lean()
+    
+    // 手动转换数据格式，确保返回id字段而不是_id字段
+    const transformedRes = res.map(item => {
+      const transformedItem = { ...item }
+      // 如果有_id字段且没有id字段，则将_id转换为id
+      if (transformedItem._id && !transformedItem.id) {
+        transformedItem.id = transformedItem._id
+      }
+      // 删除_id和__v字段
+      delete transformedItem._id
+      delete transformedItem.__v
+      return transformedItem
+    })
+    
     const count = await this.ctx.model.Work.find(find).countDocuments()
-    return { count, list: res, pageSize, pageIndex }
+    return { count, list: transformedRes, pageSize, pageIndex }
   }
   async publish(id: number, isTemplate = false) {
     const { ctx } = this

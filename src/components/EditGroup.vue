@@ -5,7 +5,7 @@ import { difference } from 'lodash-es'
 import { computed, ref } from 'vue'
 
 import PropsTable from '@/views/Editor/components/PropsTable.vue'
-export interface GroupProps {
+export interface PropertyGroup {
   text: string;
   items: string[];
 }
@@ -13,7 +13,7 @@ export interface GroupProps {
 // 定义props 和 emits
 interface EditGroupProps {
   props: AllComponentProps;
-  groups?: GroupProps[];
+  groups?: PropertyGroup[];
 }
 const props = withDefaults(defineProps<EditGroupProps>(), {
   groups: () => [
@@ -43,8 +43,8 @@ const emits = defineEmits(['change'])
 
 
 const currentKey = ref('item-0')
-// 基本属性合并成一个分组
-const newGroups = computed(() => {
+// 计算出所有分组
+const allGroups = computed(() => {
   const groupedPropNames = props.groups.reduce((prev, current) => {
     return [...prev, ...current.items]
   }, [] as string[]) || []
@@ -59,9 +59,9 @@ const newGroups = computed(() => {
   ]
 })
 
-// 计算成最终的分组, 每个分组包含属性名和属性值, 传递给propsTable组件分组展示
+// 将分组属性, 分别传递给propsTable组件展示
 const editGroups = computed(() => {
-  return newGroups.value.map(group => {
+  return allGroups.value.map(group => {
     const propsMap = {} as AllComponentProps
     group.items.forEach(item => {
       const key = item as keyof AllComponentProps
@@ -83,11 +83,11 @@ const handleChange = (e: { key: string; value: any }) => {
   <div class="edit-groups">
     <Collapse v-model:activeKey="currentKey">
       <CollapsePanel 
-        v-for="(item, index) in editGroups" 
-        :key="`item-${index}`" 
-        :header="item.text"
+        v-for="(group, index) in editGroups" 
+        :key="`group-${index}`" 
+        :header="group.text"
       >
-        <PropsTable :props="item.props" @change="handleChange" />
+        <PropsTable :props="group.props" @change="handleChange" />
       </CollapsePanel>
     </Collapse>
   </div>

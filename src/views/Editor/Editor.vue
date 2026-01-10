@@ -1,39 +1,45 @@
 <script lang="ts" setup>
-import { Empty, Layout, LayoutContent, LayoutSider, TabPane, Tabs, Textarea } from 'ant-design-vue'
+import { Button,Empty, Layout, LayoutContent, LayoutHeader, LayoutSider, Menu, MenuItem ,TabPane, Tabs, Textarea} from 'ant-design-vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 
+import PosterFluxLogo from '@/assets/PosterFlux.png'
 import EditGroup from '@/components/EditGroup.vue'
+import Image from '@/components/Image.vue'
+import InlineEdit from '@/components/InlineEdit.vue'
 import LayerList from '@/components/LayerList.vue'
-import PFImage from '@/components/PFImage.vue'
-import PFText from '@/components/PFText.vue'
+import Text from '@/components/Text.vue'
+import UserProfile from '@/components/UserProfile.vue'
 import defaultTextTemplates from '@/constants/defaultTemplates'
 import initContextMenu from '@/plugins/contextMenu'
 import initHotKeys from '@/plugins/hotKeys'
 import { useEditorStore } from '@/store/modules/editor';
 import type { ComponentData } from '@/store/modules/editor/helper'
-import useTemplateStore from '@/store/modules/templates'
+import useUserStore from '@/store/modules/user'
 
-import PFComponentsList from './components/ComponentsList.vue'
-import PFEditWrapper from './components/EditWrapper.vue'
+import ComponentsList from './components/ComponentsList.vue'
+import EditWrapper from './components/EditWrapper.vue'
 import HistoryArea from './components/HistoryArea.vue'
 import PropsTable from './components/PropsTable.vue'
 
 export type TabType = 'component' | 'layer' | 'page'
 
 defineOptions({
-  name: 'PFEditor'
+  name: 'Editor',
+  components: {
+    EditWrapper,
+    ComponentsList,
+    PropsTable,
+    LayerList,
+    HistoryArea,
+    Text,
+    Image,
+    Textarea,
+  },
 })
 
 const editorStore = useEditorStore()
 const components = computed(() => editorStore.state.components)
-
-// 创建组件映射，用于动态渲染不同类型的组件
-const componentMap = {
-  PFText,
-  PFImage,
-  Textarea,
-}
 
 // 处理物料区点击事件, 添加物料到pinia中的ediotor仓库, 进而在画布区进行展示
 // 处理物料区上传图片,
@@ -46,6 +52,7 @@ const activeComponent = computed<ComponentData | undefined>(() => {
   return editorStore.state.components.find((item) => item.id === editorStore.state.currentElement)
 })
 const setActive = (id: string) => {
+  // 在editorStore中设置currentElement为当前激活的组件ID
   editorStore.setActive(id)
 }
 
@@ -92,24 +99,68 @@ initContextMenu()
 
 // 从路由参数中获取模板ID
 const route = useRoute()
-const templateStore = useTemplateStore()
 const currentWorkId = computed(() => route.params.id)
 onMounted(() => {
   if (currentWorkId.value) {
     if (typeof currentWorkId.value === 'string') {
-      templateStore.fetchWork(currentWorkId.value)
-    } 
+      editorStore.fetchTemplateForEditor(currentWorkId.value)
+    }
   }
 })
+
+// 展示header中用户名
+const user = useUserStore()
+const userInfo = computed(() => user.state)
+// 修改页面标题
+function titleChange(title: string) {
+  const page = editorStore.state.page
+  editorStore.updateComponent({ 
+    isRoot: true, 
+    page: { ...page, title } 
+  } as ComponentData)
+}
+// 保存模板
+function saveAsTemplate() {
+  editorStore.saveAsTemplate(currentWorkId.value as string)
+}
 </script>
 
 <template>
   <div class="editor-container">
     <Layout>
+      <LayoutHeader class="header">
+        <div class="page-title">
+          <router-link to="/">
+            <img alt="PosterFlux" :src="PosterFluxLogo" class="poster-img">
+          </router-link>
+          <inline-edit :value="page.title || '未命名作品'" @change="titleChange" />
+        </div>
+        <Menu 
+          :selectable="false" 
+          theme="dark" 
+          mode="horizontal" 
+          :style="{ lineHeight: '64px' }"
+        >
+          <MenuItem key="1">
+            <Button type="primary">预览和设置</Button>
+          </MenuItem>
+          <MenuItem key="2">
+            <Button type="primary" @click="saveAsTemplate">保存</Button>
+          </MenuItem>
+          <MenuItem key="3">
+            <Button type="primary" @click="() =>{}">发布</Button>
+          </MenuItem>
+          <MenuItem key="4">
+            <user-profile :user="userInfo" />
+          </MenuItem>
+        </Menu>
+      </LayoutHeader>
+    </Layout>
+    <Layout>
       <!-- 物料库 -->
       <LayoutSider width="300" class="sider-container">
         <div class="sider-content">
-          <PFComponentsList :list="defaultTextTemplates" @on-item-click="addItem" />
+          <ComponentsList :list="defaultTextTemplates" @on-item-click="addItem" />
         </div>
       </LayoutSider>
       <!-- 画布区域 -->
@@ -118,7 +169,7 @@ onMounted(() => {
           <p>画布区域</p>
           <HistoryArea />
           <div id="canvas-area" class="preview-list" :style="page.props">
-            <PFEditWrapper 
+            <EditWrapper 
               v-for="component in components" 
               :id="component.id" 
               :key="component.id"
@@ -127,12 +178,12 @@ onMounted(() => {
               @set-active="setActive" 
               @update-position="handleUpdatePosition"
             >
-              <component 
-                :is="componentMap[component.name]" 
+              <component
+                :is="component.name" 
                 v-bind="component.props"
-                v-if="componentMap[component.name]" 
+                v-if="component.name" 
               />
-            </PFEditWrapper>
+            </EditWrapper>
           </div>
         </LayoutContent>
       </Layout>
@@ -174,6 +225,126 @@ onMounted(() => {
 </template>
 
 <style>
+/* Header 区域样式 */
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  padding: 0 24px !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+}
+
+/* Logo 样式 */
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.poster-img {
+  height: 32px;
+  width: auto;
+  transition: all 0.3s ease;
+  border-radius: 4px;
+  padding: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.logo-img:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* 作品标题编辑样式 */
+.page-title .inline-edit {
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.page-title .inline-edit:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* 导航菜单样式 */
+.header .ant-menu {
+  background: transparent !important;
+  border-bottom: none !important;
+  flex: 0 0 auto;
+}
+
+.header .ant-menu-item {
+  color: rgba(255, 255, 255, 0.85) !important;
+  padding: 0 12px !important;
+  border: none !important;
+}
+
+.header .ant-menu-item:hover {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 按钮样式 */
+.header .ant-btn {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.header .ant-btn-primary {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.header .ant-btn-primary:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+/* 用户信息区域 */
+.header .user-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.header .user-profile:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* 响应式调整 */
+@media (max-width: 1200px) {
+  .header {
+    padding: 0 16px !important;
+  }
+
+  .header .ant-menu-item {
+    padding: 0 8px !important;
+  }
+}
+
+@media (max-width: 992px) {
+  .page-title .inline-edit {
+    font-size: 16px;
+  }
+
+  .header .ant-btn span {
+    font-size: 14px;
+  }
+}
+
 .editor-container .sider-container {
   background: yellow;
 }

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { DragOutlined,EyeInvisibleOutlined, EyeOutlined, LockOutlined, UnlockOutlined } from '@ant-design/icons-vue'
+import { DragOutlined, EyeInvisibleOutlined, EyeOutlined, LockOutlined, UnlockOutlined } from '@ant-design/icons-vue'
 import { Button, Tooltip } from 'ant-design-vue'
 import { arrayMoveImmutable } from 'array-move'
 import { reactive } from 'vue'
@@ -35,14 +35,13 @@ const dragData = reactive({
   currentDragging: '',
   currentIndex: -1
 })
-
 function onDragStart(e: DragEvent, id: string, index: number) {
   dragData.currentDragging = id
   dragData.currentIndex = index
 }
 function onDragEnter(e: DragEvent,index:number) {
   // 拖动时交换元素位置
-  if(dragData.currentIndex!==index) {
+  if(dragData.currentIndex !== index) {
     const newList = arrayMoveImmutable(props.list, dragData.currentIndex, index)
     emits('changeList', newList)
     dragData.currentIndex = index
@@ -82,8 +81,8 @@ function onDrop(e: DragEvent) {
         draggable="true"
         :data-index="index"
         @click="handleClick(item.id)"
-        @dragstart="onDragStart($event,item.id,index)"
-        @dragenter="onDragEnter($event,index)"
+        @dragstart="onDragStart($event, item.id, index)"
+        @dragenter="onDragEnter($event, index)"
       >
         <Tooltip :title="item.isHidden ? '显示' : '隐藏'">
           <Button shape="circle" @click.stop="handleChange(item.id, 'isHidden', !item.isHidden)">

@@ -3,7 +3,7 @@ import { pick } from 'lodash-es'
 import { computed, nextTick, ref } from 'vue'
 
 defineOptions({
-  name: 'PFEditWrapper',
+  name: 'EditWrapper',
 })
 
 // 定义组件props 与 emits
@@ -41,7 +41,7 @@ function handleDragStart(e: MouseEvent) {
   pointerOffsetInElement.y = e.clientY - top; // (鼠标在元素内部，距顶部px)
   pointerOffsetInElement.x = e.clientX - left; // (鼠标在元素内部，距左侧px)
 
-  // 计算元素在容器中的新位置
+  // 计算被拖动元素在画布区的新位置
   function calculateElementPosition(e: MouseEvent) {
     // e.clientX 鼠标相对于浏览器视口左上角的水平距离
     // e.clientY 鼠标相对于浏览器视口左上角的垂直距离

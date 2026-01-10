@@ -102,9 +102,9 @@ async function getCode(cellphone: string) {
       <Col :span="12" class="aside">
         <div class="aside-inner">
           <router-link to="/">
-            <img alt="FK-KlickPoster" src="../assets/login.png" class="pf-img">
+            <img alt="FK-PosterFlux" src="../assets/login.png" class="pf-img">
           </router-link>
-          <h2>欢迎使用KlickPoster</h2>
+          <h2>欢迎使用PosterFlux</h2>
         </div>
       </Col>
       <Col :span="12" class="login-area">

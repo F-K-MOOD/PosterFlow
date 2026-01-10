@@ -45,6 +45,26 @@ function initWorkModel(app: Application) {
     latestPublishAt: { type: Date },
   }, { timestamps: true })
   WorkSchema.plugin(AutoIncrement, { inc_field: 'id', id: 'works_id_counter' })
+  
+  // 添加toJSON转换函数，确保返回id字段而不是_id字段
+  WorkSchema.set('toJSON', {
+    transform(_doc, ret) {
+      const workRet = ret as any
+      delete workRet._id
+      delete workRet.__v
+      // 确保日期格式正确
+      if (workRet.createdAt instanceof Date) {
+        workRet.createdAt = workRet.createdAt.toISOString()
+      }
+      if (workRet.updatedAt instanceof Date) {
+        workRet.updatedAt = workRet.updatedAt.toISOString()
+      }
+      if (workRet.latestPublishAt instanceof Date) {
+        workRet.latestPublishAt = workRet.latestPublishAt.toISOString()
+      }
+    }
+  })
+  
   return mongoose.model<WorkProps>('Work', WorkSchema)
 }
 

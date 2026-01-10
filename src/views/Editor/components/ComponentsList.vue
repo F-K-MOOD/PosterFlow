@@ -2,8 +2,8 @@
 import { message } from 'ant-design-vue';
 import { v4 as uuidv4 } from 'uuid'
 
-import PFText from '@/components/PFText.vue';
 import StyledUploader from '@/components/StyledUploader.vue'
+import Text from '@/components/Text.vue';
 import { imageComponentProps } from '@/constants/imageComponentProps';
 import type { ComponentData } from '@/store/modules/editor/helper';
 import type { AllComponentProps } from '@/store/modules/editor/helper';
@@ -11,7 +11,7 @@ import type { RespUploadData } from '@/types/respTypes';
 import { getImageDimensions } from '@/utils/getImageDimensions'
 
 defineOptions({
-  name: 'PFComponentsList',
+  name: 'ComponentsList',
 })
 
 // 定义组件props 与 emits
@@ -28,7 +28,7 @@ function onItemClick(item: Partial<AllComponentProps>) {
   // 为文本组件添加name字段
   const componentData = {
     id: uuidv4(),
-    name: 'PFText',
+    name: 'Text',
     props: item
   }
   emits('on-item-click', componentData)
@@ -36,9 +36,10 @@ function onItemClick(item: Partial<AllComponentProps>) {
 
 function onImageUploaded(data: { resp: RespUploadData; file: File }) {
   const { resp, file } = data
+  // 加入图片的默认属性, 拼接成完整的ComponentData
   const componentData: ComponentData = {
     id: uuidv4(),
-    name: 'PFImage',
+    name: 'Image',
     props: {
       ...imageComponentProps
     }
@@ -67,7 +68,7 @@ function onImageUploaded(data: { resp: RespUploadData; file: File }) {
       class="component-item" 
       @click="onItemClick(item)"
     >
-      <PFText v-bind="item" />
+      <Text v-bind="item" />
     </div>
   </div>
   <StyledUploader @success="onImageUploaded" />

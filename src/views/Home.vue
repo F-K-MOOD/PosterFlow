@@ -26,7 +26,6 @@ import useTemplateStore from '@/store/modules/templates'
 
 import TemplateList from '../components/TemplateList.vue'
 
-
 const templateStore = useTemplateStore()
 const testData = computed(() => templateStore.state.data)
 const total = computed(() => templateStore.state.totalTemplates)
