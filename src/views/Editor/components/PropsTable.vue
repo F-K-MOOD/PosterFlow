@@ -8,6 +8,7 @@ import BackgroundProcesser from '@/components/BackgroundProcesser.vue'
 import ColorPicker from '@/components/ColorPicker.vue'
 import ImageProcesser from '@/components/ImageProcesser.vue'
 import ShadowPicker from '@/components/ShadowPicker.vue'
+import Text from '@/components/Text.vue'
 import type { AllComponentProps } from '@/store/modules/editor/helper'
 import type { PropsToForms } from '@/types/propsMap'
 import { mapPropsToForms } from '@/types/propsMap'
@@ -15,7 +16,7 @@ import { mapPropsToForms } from '@/types/propsMap'
 import RenderVnode from '../../../components/RenderVnode';
 
 defineOptions({
-  name: 'PFPropsTable',
+  name: 'PropsTable',
   components: {
     ImageProcesser,
     RenderVnode,
@@ -29,7 +30,8 @@ defineOptions({
     InputNumber,
     Input,
     ShadowPicker,
-    BackgroundProcesser
+    BackgroundProcesser,
+    Text
   },
 })
 
@@ -55,7 +57,7 @@ const emits = defineEmits(['change'])
 // 处理props, 转换为表单props
 const finalProps = computed(() => {
   return reduce(props.props, (result, value, key) => {
-    // 这里的key是components列表里面的中的id, name, props里面的key
+    // 这里的key是 components 列表里面的中的id, name, props里面的key
     const newKey = key
     // 获取需要使用组件来展示的属性, 
     const item = mapPropsToForms[newKey]
@@ -73,18 +75,9 @@ const finalProps = computed(() => {
             // 确保只有用户交互才触发更新，而不是初始化时
             // 对于 InputNumber 组件，e 是数字值
             // 对于其他组件，e 可能是事件对象
-            let actualValue = e
-            if (e && typeof e === 'object' && 'target' in e) {
-              actualValue = (e.target as HTMLInputElement).value
-            }
-
             // 计算转换后的值
-            const transformedValue = item.afterTransform ? item.afterTransform(actualValue) : actualValue
-
-            // 只有当值真正改变时才触发更新
-            if (transformedValue !== value) {
-              emits('change', { key: newKey, value: transformedValue })
-            }
+            const transformedValue = item.afterTransform ? item.afterTransform(e) : e
+            emits('change', { key: newKey, value: transformedValue })
           }
         }
       }

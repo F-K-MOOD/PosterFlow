@@ -14,6 +14,8 @@ ImageProcesser
 inital
 Kaiti
 Klick
+mywork
+Persistedstate
 processer
 qrcode
 RenderVnode

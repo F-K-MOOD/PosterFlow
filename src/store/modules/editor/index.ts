@@ -1,11 +1,12 @@
-import {message} from 'ant-design-vue'
-import {cloneDeep} from 'lodash-es'
+import { message } from 'ant-design-vue'
+import { cloneDeep } from 'lodash-es'
 import { defineStore } from 'pinia'
 import { v4 as uuidv4 } from 'uuid'
 import { computed, reactive } from 'vue'
 
+import { editorSaveWorkAPI,fetchWork as editorFetchWorkAPI } from '@/api/templates'
 import { pageProps } from '@/constants/pageProps'
-import { textComponentProps } from '@/constants/textComponentProps'
+// import { textComponentProps } from '@/constants/textComponentProps'
 import debounce from '@/utils/debounce'
 import { insertAt } from '@/utils/insertAt'
 
@@ -14,7 +15,7 @@ import type { ComponentData, EditorProps, HistoryRecord, PageProps } from './hel
 export const useEditorStore = defineStore('editor', () => {
   const state: EditorProps = reactive({
     components: [
-      { id: uuidv4(), name: 'PFText', layerName: '图层1', props: { ...textComponentProps, text: 'hello', fontSize: '20px', color: '#000000', 'lineHeight': '1', textAlign: 'left', fontFamily: '', width: '100px', height: '100px', backgroundColor: '#efefef', left: '100px', top: '150px' } },
+      // { id: uuidv4(), name: 'PFText', layerName: '图层1', props: { ...textComponentProps, text: 'hello', fontSize: '20px', color: '#000000', 'lineHeight': '1', textAlign: 'left', fontFamily: '', width: '100px', height: '100px', backgroundColor: '#efefef', left: '100px', top: '150px' } },
       // { id: uuidv4(), name: 'PFText', layerName:'图层2', props: { ...textComponentProps, text: 'hello2', fontSize: '10px', fontWeight: 'bold', 'lineHeight': '2', textAlign: 'left', fontFamily: '' }},
       // { id: uuidv4(), name: 'PFText', layerName:'图层3', props: { ...textComponentProps, text: 'hello3', fontSize: '15px', actionType: 'url', url: 'https://www.baidu.com', 'lineHeight': '3', textAlign: 'left', fontFamily: '' }},
       // { id: uuidv4(), name: 'PFImage', layerName:'图层4', props: { ...imageComponentProps, src: 'http://vue-maker.oss-cn-hangzhou.aliyuncs.com/vue-marker/5f3e3a17c305b1070f455202.jpg', width: '100px' }},
@@ -25,7 +26,7 @@ export const useEditorStore = defineStore('editor', () => {
       title: 'test title'
     },
     copiedComponent: {} as ComponentData,
-    histories:[] as HistoryRecord[],
+    histories: [] as HistoryRecord[],
     historyIndex: -1,
     maxHistoryNumber: 5,
   })
@@ -99,7 +100,10 @@ export const useEditorStore = defineStore('editor', () => {
   //! 右侧配置区
   // 右侧配置区 更新组件属性
   function updateComponent(data: ComponentData) {
-    const { id, isHidden, isLocked, layerName, isRoot, props } = data
+    const { id, isHidden, isLocked, layerName,isRoot, props, page } = data
+    if(page) {
+      state.page = page
+    }
     let component: ComponentData | undefined
     if (id) {
       component = state.components.find((item) => (item.id === id))
@@ -164,7 +168,7 @@ export const useEditorStore = defineStore('editor', () => {
     const component = state.components.find((item) => item.id === id)
     if (component) {
       state.copiedComponent = component
-      message.success('复制成功',1)
+      message.success('复制成功', 1)
     }
   }
   // 粘贴组件,ctrl+v,command+v  添加历史记录
@@ -173,7 +177,7 @@ export const useEditorStore = defineStore('editor', () => {
       const cloneComponent = cloneDeep(state.copiedComponent)
       cloneComponent.id = uuidv4()
       cloneComponent.layerName = cloneComponent.layerName + '副本'
-      state.components.push(cloneComponent) 
+      state.components.push(cloneComponent)
       // 添加历史记录
       pushHistory(state, {
         id: uuidv4(),
@@ -198,7 +202,7 @@ export const useEditorStore = defineStore('editor', () => {
         type: 'delete',
         data: component
       })
-      message.success('删除成功',1)
+      message.success('删除成功', 1)
     }
   }
   // 取消选中组件,esc
@@ -230,15 +234,15 @@ export const useEditorStore = defineStore('editor', () => {
   }
   // 撤销
   function undo() {
-    if(state.historyIndex === -1) {
+    if (state.historyIndex === -1) {
       // 如果没有点过撤销
       state.historyIndex = state.histories.length - 1
     } else {
       state.historyIndex--
     }
     const history = state.histories[state.historyIndex]
-    if(!history) return
-    switch(history.type) {
+    if (!history) return
+    switch (history.type) {
       case 'add':
         state.components = state.components.filter((item) => item.id !== history.componentId)
         break
@@ -258,7 +262,7 @@ export const useEditorStore = defineStore('editor', () => {
       return
     }
     const history = state.histories[state.historyIndex]
-    if(!history) return
+    if (!history) return
     switch (history.type) {
       case 'add':
         state.components.push(history.data)
@@ -281,7 +285,7 @@ export const useEditorStore = defineStore('editor', () => {
     const updatedComponent = state.components.find((component) => component.id === componentId)
     if (updatedComponent) {
       // check if key is array
-      if(type === 'undo') {
+      if (type === 'undo') {
         updatedComponent.props = oldValue
       } else {
         updatedComponent.props = newValue
@@ -290,7 +294,7 @@ export const useEditorStore = defineStore('editor', () => {
   }
   // 计算属性 撤销是否禁用
   const undoIsDisabled = computed(() => {
-    if(state.historyIndex === 0 || state.histories.length === 0) {
+    if (state.historyIndex === 0 || state.histories.length === 0) {
       return true
     } else {
       return false
@@ -298,7 +302,7 @@ export const useEditorStore = defineStore('editor', () => {
   })
   // 计算属性 重做是否禁用
   const redoIsDisabled = computed(() => {
-    if(state.historyIndex === state.histories.length || state.histories.length === 0 || state.historyIndex === -1) {
+    if (state.historyIndex === state.histories.length || state.histories.length === 0 || state.historyIndex === -1) {
       return true
     } else {
       return false
@@ -310,15 +314,56 @@ export const useEditorStore = defineStore('editor', () => {
   // 支持撤销重做的最大历史记录数
   function pushHistory(state: EditorProps, history: HistoryRecord) {
     // 如果已经发生了回滚, 先删除当前位置后面的所有历史记录
-    if(state.historyIndex !== -1) {
+    if (state.historyIndex !== -1) {
       state.histories = state.histories.slice(0, state.historyIndex)
       state.historyIndex = -1
     }
     // 如果历史记录数超过最大记录数, 删除最早的一条
-    if(state.histories.length === state.maxHistoryNumber) {
+    if (state.histories.length === state.maxHistoryNumber) {
       state.histories.shift()
     }
     state.histories.push(history)
+  }
+
+
+  // 获取Editor组件需要展示的模板数据
+  async function fetchTemplateForEditor(id: string) {
+    try {
+      const response = await editorFetchWorkAPI(id)
+      console.log('response', response)
+      const { content,coverImg,  } = response.data.data
+      if (content) {
+        // 从content.page.props中获取页面属性
+        if (content.page && content.page.props) {
+          const backgroundImage =  `url(${coverImg})`
+          state.page.props = {
+            ...state.page.props,
+            backgroundImage
+          }
+        }
+        // 从content.components中获取组件列表
+        if (content.components) {
+          state.components = content.components
+          console.log('content.components', content.components)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch template data for editor:', error)
+      message.error('加载模板失败，请稍后重试')
+    }
+  }
+
+  // 保存模板
+  async function saveAsTemplate(id: string) {
+    const payload = {
+      title: state.page.title || '未命名作品',
+      content: {
+        props: state.page.props || {},
+        components: state.components
+      },
+    }
+    await editorSaveWorkAPI(payload, id)
+    message.success('保存成功')
   }
   return {
     state,
@@ -339,5 +384,7 @@ export const useEditorStore = defineStore('editor', () => {
     undoIsDisabled,
     redoIsDisabled,
     pushHistory,
+    fetchTemplateForEditor,
+    saveAsTemplate
   }
 })

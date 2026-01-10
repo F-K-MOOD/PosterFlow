@@ -43,6 +43,9 @@ const emits = defineEmits(['change', 'uploaded', 'success', 'error'])
 
 // 完成基本上传功能
 const fileInput = ref<HTMLInputElement | null>(null)
+let events: Record<string, (e: any) => void> = {
+  "click": triggerUpload,
+}
 function triggerUpload() {
   if (fileInput.value) {
     fileInput.value.click()
@@ -108,6 +111,7 @@ function postFile(uploadFile: UploadFile) {
     }
   }).then(res => {
     uploadFile.status = 'success'
+    console.log('上传图片成功', res)
     uploadFile.resp = res.data
     emits('success', { resp: res.data, file: uploadFile, list: uploadedFiles.value })
   }).catch(e => {
@@ -145,9 +149,6 @@ const lastFileData = computed(() => {
 })
 
 // 支持拖拽上传
-let events: Record<string, (e: any) => void> = {
-  "click": triggerUpload,
-}
 if (props.drag) {
   events["dragover"] = (e: DragEvent) => handleDrag(e, true)
   events["dragleave"] = (e: DragEvent) => handleDrag(e, false)

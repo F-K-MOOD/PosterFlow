@@ -1,4 +1,7 @@
+import type { ComponentData } from '@/store/modules/editor/helper'
 import service from '@/utils/request'
+
+
 
 export function fetchTemplates(params: { title?: string; pageIndex: number; pageSize: number }) {
   return service({
@@ -27,6 +30,14 @@ export function fetchWork(id: string) {
   return service({
     url: `/works/${id}`,
     method: 'get',
+  })
+}
+
+export function editorSaveWorkAPI(payload: { title: string; content: { props: Record<string, any>; components: ComponentData[] } },id:string) {
+  return service({
+    url: `/works/${id}`,
+    method: 'patch',
+    data: payload
   })
 }
 

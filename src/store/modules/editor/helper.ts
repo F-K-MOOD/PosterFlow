@@ -27,7 +27,7 @@ export interface EditorProps {
   // channels: ChannelProps[];
 }
 export interface ComponentData {
-  // 这个元素的 属性，属性请详见下面
+  // 这个元素的 属性，
   props: Partial<AllComponentProps>;
   // id，uuid v4 生成
   id: string;
@@ -51,7 +51,7 @@ export interface HistoryRecord {
   index?: number;
 }
 export interface PageData {
-  id?: number;
+  id?: number | string;
   props?: PageProps;
   title?: string;
   desc?: string;
@@ -78,9 +78,9 @@ export interface ChannelProps {
   status: number;
 }
 export interface PageProps {
-  backgroundColor: string;
-  backgroundImage: string;
-  backgroundRepeat: string;
-  backgroundSize: string;
-  height: string;
+  backgroundColor?: string;
+  backgroundImage?: string;
+  backgroundRepeat?: string;
+  backgroundSize?: string;
+  height?: string;
 }

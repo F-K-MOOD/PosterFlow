@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, reactive } from 'vue'
+import { reactive } from 'vue'
 
 import { fetchTemplates as fetchTemplatesApi, fetchWork as fetchWorkApi,fetchWorks as fetchWorksApi } from '@/api/templates'
 import type { RespData } from '@/types/respTypes'
@@ -15,9 +15,12 @@ const useTemplateStore = defineStore('templateStore', () => {
     totalWorks: 0
   })
 
-  const getTemplateById = computed(() => (id: number) => {
+  function getTemplateById(id: string) {
     return state.data.find(t => t.id === id)
-  })
+  }
+  function fetchTemplate(rawData: RespData<TemplateProps>) {
+    state.data = [rawData.data]
+  }
   async function fetchTemplates(params: { title?: string; pageIndex: number; pageSize: number }) {
     console.log('Fetching templates with params:', params)
     const resp = await fetchTemplatesApi(params)
@@ -38,9 +41,7 @@ const useTemplateStore = defineStore('templateStore', () => {
 
   async function fetchWork(id: string) {
     const resp = await fetchWorkApi(id)
-    console.log('API Response:', resp)
-    const { data } = resp.data.data
-    console.log('Work from backend:', data)
+    const { data } = resp.data
     state.works = [data]
   }
 
@@ -51,10 +52,6 @@ const useTemplateStore = defineStore('templateStore', () => {
     // state.works = list
     // state.totalWorks = count
   }
-  function fetchTemplate(rawData: RespData<TemplateProps>) {
-    state.data = [rawData.data]
-  }
-
   return {
     state,
     fetchTemplates,
