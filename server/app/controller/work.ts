@@ -139,16 +139,36 @@ export default class WorkController extends Controller {
             }
           }
 
-          // 确保fontSize是带px单位的字符串
-          if (mergedProps.fontSize !== undefined) {
-            // 如果fontSize是数字，转换为带px的字符串
-            if (typeof mergedProps.fontSize === 'number') {
-              mergedProps.fontSize = `${mergedProps.fontSize}px`
+          // 确保top是带px单位的字符串，无论原始单位是什么
+          if (mergedProps.top !== undefined) {
+            let topValue
+            if (typeof mergedProps.top === 'number') {
+              topValue = mergedProps.top
+            } else if (typeof mergedProps.top === 'string') {
+              // 提取数字部分，不管单位是什么
+              const match = mergedProps.top.match(/^\d+(\.\d+)?/)
+              topValue = match ? parseFloat(match[0]) : 0
+            } else {
+              topValue = 0
             }
-            // 如果fontSize是字符串但不带px单位，添加px单位
-            else if (typeof mergedProps.fontSize === 'string' && !mergedProps.fontSize.includes('px') && !mergedProps.fontSize.includes('em') && !mergedProps.fontSize.includes('rem') && !mergedProps.fontSize.includes('%')) {
-              mergedProps.fontSize = `${mergedProps.fontSize}px`
+            // 始终转换为px单位
+            mergedProps.top = `${topValue}px`
+          }
+
+          // 确保left是带px单位的字符串，无论原始单位是什么
+          if (mergedProps.left !== undefined) {
+            let leftValue
+            if (typeof mergedProps.left === 'number') {
+              leftValue = mergedProps.left
+            } else if (typeof mergedProps.left === 'string') {
+              // 提取数字部分，不管单位是什么
+              const match = mergedProps.left.match(/^\d+(\.\d+)?/)
+              leftValue = match ? parseFloat(match[0]) : 0
+            } else {
+              leftValue = 0
             }
+            // 始终转换为px单位
+            mergedProps.left = `${leftValue}px`
           }
 
           return {
@@ -221,6 +241,38 @@ export default class WorkController extends Controller {
             else if (typeof mergedProps.fontSize === 'string' && !mergedProps.fontSize.includes('px') && !mergedProps.fontSize.includes('em') && !mergedProps.fontSize.includes('rem') && !mergedProps.fontSize.includes('%')) {
               mergedProps.fontSize = `${mergedProps.fontSize}px`
             }
+          }
+
+          // 确保top是带px单位的字符串，无论原始单位是什么
+          if (mergedProps.top !== undefined) {
+            let topValue
+            if (typeof mergedProps.top === 'number') {
+              topValue = mergedProps.top
+            } else if (typeof mergedProps.top === 'string') {
+              // 提取数字部分，不管单位是什么
+              const match = mergedProps.top.match(/^\d+(\.\d+)?/)
+              topValue = match ? parseFloat(match[0]) : 0
+            } else {
+              topValue = 0
+            }
+            // 始终转换为px单位
+            mergedProps.top = `${topValue}px`
+          }
+
+          // 确保left是带px单位的字符串，无论原始单位是什么
+          if (mergedProps.left !== undefined) {
+            let leftValue
+            if (typeof mergedProps.left === 'number') {
+              leftValue = mergedProps.left
+            } else if (typeof mergedProps.left === 'string') {
+              // 提取数字部分，不管单位是什么
+              const match = mergedProps.left.match(/^\d+(\.\d+)?/)
+              leftValue = match ? parseFloat(match[0]) : 0
+            } else {
+              leftValue = 0
+            }
+            // 始终转换为px单位
+            mergedProps.left = `${leftValue}px`
           }
 
           return {
