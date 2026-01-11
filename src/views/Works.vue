@@ -76,7 +76,7 @@ import { Button, Empty ,Row, TabPane,Tabs} from 'ant-design-vue'
 import {  computed, nextTick,onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import WorksList from '@/components/WorksList.vue'
+// import WorksList from '@/components/WorksList.vue'
 import useTemplateStore from '@/store/modules/templates'
 
 import useLoadMore from '../hooks/useLoadMore'

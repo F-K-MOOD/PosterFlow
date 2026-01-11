@@ -118,7 +118,7 @@ export default class WorkController extends Controller {
           // 将type字段转换为name字段
           // 并确保组件名称与前端注册的组件名称一致
           const componentName = component.type === 'text' ? 'Text' : 'PFImage'
-          
+
           // 合并props和style字段，因为前端期望所有样式都在props中
           const mergedProps = {
             ...component.props,
@@ -126,7 +126,31 @@ export default class WorkController extends Controller {
             // 确保position属性存在
             position: component.style?.position || 'absolute'
           }
-          
+
+          // 确保fontSize是带px单位的字符串
+          if (mergedProps.fontSize !== undefined) {
+            // 如果fontSize是数字，转换为带px的字符串
+            if (typeof mergedProps.fontSize === 'number') {
+              mergedProps.fontSize = `${mergedProps.fontSize}px`
+            }
+            // 如果fontSize是字符串但不带px单位，添加px单位
+            else if (typeof mergedProps.fontSize === 'string' && !mergedProps.fontSize.includes('px') && !mergedProps.fontSize.includes('em') && !mergedProps.fontSize.includes('rem') && !mergedProps.fontSize.includes('%')) {
+              mergedProps.fontSize = `${mergedProps.fontSize}px`
+            }
+          }
+
+          // 确保fontSize是带px单位的字符串
+          if (mergedProps.fontSize !== undefined) {
+            // 如果fontSize是数字，转换为带px的字符串
+            if (typeof mergedProps.fontSize === 'number') {
+              mergedProps.fontSize = `${mergedProps.fontSize}px`
+            }
+            // 如果fontSize是字符串但不带px单位，添加px单位
+            else if (typeof mergedProps.fontSize === 'string' && !mergedProps.fontSize.includes('px') && !mergedProps.fontSize.includes('em') && !mergedProps.fontSize.includes('rem') && !mergedProps.fontSize.includes('%')) {
+              mergedProps.fontSize = `${mergedProps.fontSize}px`
+            }
+          }
+
           return {
             id: component.id,
             name: componentName,
@@ -185,6 +209,18 @@ export default class WorkController extends Controller {
             ...component.style,
             // 确保position属性存在
             position: component.style?.position || 'absolute'
+          }
+
+          // 确保fontSize是带px单位的字符串
+          if (mergedProps.fontSize !== undefined) {
+            // 如果fontSize是数字，转换为带px的字符串
+            if (typeof mergedProps.fontSize === 'number') {
+              mergedProps.fontSize = `${mergedProps.fontSize}px`
+            }
+            // 如果fontSize是字符串但不带px单位，添加px单位
+            else if (typeof mergedProps.fontSize === 'string' && !mergedProps.fontSize.includes('px') && !mergedProps.fontSize.includes('em') && !mergedProps.fontSize.includes('rem') && !mergedProps.fontSize.includes('%')) {
+              mergedProps.fontSize = `${mergedProps.fontSize}px`
+            }
           }
 
           return {
