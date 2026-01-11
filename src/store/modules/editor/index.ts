@@ -345,6 +345,10 @@ export const useEditorStore = defineStore('editor', () => {
         if (content.components) {
           state.components = content.components
           console.log('content.components', content.components)
+          // 自动激活第一个组件
+          if (content.components.length > 0) {
+            state.currentElement = content.components[0].id
+          }
         }
       }
     } catch (error) {

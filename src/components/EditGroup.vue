@@ -61,18 +61,22 @@ const allGroups = computed(() => {
 
 // 将分组属性, 分别传递给propsTable组件展示
 const editGroups = computed(() => {
-  return allGroups.value.map(group => {
+  const tempGroups = allGroups.value.map(group => {
     const propsMap = {} as AllComponentProps
     group.items.forEach(item => {
       const key = item as keyof AllComponentProps
       // propsMap 数据类型为propsTable组件的props类型, 对象里面是key-value对
-      propsMap[key] = props.props[key]
+      if(props.props[key] !== undefined) {
+        propsMap[key] = props.props[key]
+      }
     })
     return {
       ...group,
       props: propsMap
     }
   })
+  // 过滤掉属性为空的分组
+  return tempGroups.filter(ediGroup => Object.keys(ediGroup.props).length > 0)
 })
 const handleChange = (e: { key: string; value: any }) => {
   emits('change', e)
@@ -83,11 +87,11 @@ const handleChange = (e: { key: string; value: any }) => {
   <div class="edit-groups">
     <Collapse v-model:activeKey="currentKey">
       <CollapsePanel 
-        v-for="(group, index) in editGroups" 
+        v-for="(ediGroup, index) in editGroups" 
         :key="`group-${index}`" 
-        :header="group.text"
+        :header="ediGroup.text"
       >
-        <PropsTable :props="group.props" @change="handleChange" />
+        <PropsTable :props="ediGroup.props" @change="handleChange" />
       </CollapsePanel>
     </Collapse>
   </div>
